@@ -11,7 +11,7 @@ namespace Model
     public class Partida : INotifyPropertyChanged
     {
         public int id;
-        public ObservableCollection<Jugador> jugadorList = new();
+        public List<Jugador> jugadorList = new();
         public int jugadorTurno;
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -148,8 +148,8 @@ namespace RiskWPF
             {
                 if (pais.jugadorId != Utils.partida.jugadorTurno)
                 {
-                    PintarPaisEnColor(color, Utils.GetColorFromName(Utils.partida.jugadorList.FirstOrDefault(e => e.Id == Utils.partida.jugadorTurno).Color));
-                    pais.color1 = Utils.GetColorFromName(Utils.partida.jugadorList.FirstOrDefault(e => e.Id == Utils.partida.jugadorTurno).Color);
+                    PintarPaisEnColor(color, Utils.GetColorFromName(Utils.partida.jugadorList.FirstOrDefault(e => e.UserId == Utils.partida.jugadorTurno).Color));
+                    pais.color1 = Utils.GetColorFromName(Utils.partida.jugadorList.FirstOrDefault(e => e.UserId == Utils.partida.jugadorTurno).Color);
                     pais.jugadorId = Utils.partida.jugadorTurno;
                     RepintarLienzo();
                 }

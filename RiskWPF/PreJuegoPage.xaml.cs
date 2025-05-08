@@ -31,18 +31,21 @@ namespace RiskWPF
         {
             InitializeComponent();
 
-            cboColor.ItemsSource = colores; 
+            cboColor.ItemsSource = colores;
+            //Conection.StartListening();
             Conection.OnMessageReceived += MensajeRecibidoWebSocket;
 
             if (Utils.demo)
             {
-                Utils.partida.jugadorList.Add(new Jugador(98, "Usuario1", "Rojo", true));
-                Utils.partida.jugadorList.Add(new Jugador(99, "Usuario2", "Azul", true));
-                Utils.partida.jugadorList.Add(new Jugador(100, "Usuario3", "Amarillo", true));
-                Utils.partida.jugadorList.Add(new Jugador(Utils.user));
+                Utils.sala.Jugadores.Add(new Jugador(98, "Usuario1", "Rojo", true));
+                Utils.sala.Jugadores.Add(new Jugador(99, "Usuario2", "Azul", true));
+                Utils.sala.Jugadores.Add(new Jugador(100, "Usuario3", "Amarillo", true));
+                //Utils.partida.jugadorList.Add(new Jugador(Utils.user));
 
-                lbJugadores.ItemsSource = Utils.partida.jugadorList;
             }
+            txtLobbyName.Text = Utils.sala.Nombre;
+            lbJugadores.ItemsSource = Utils.sala.Jugadores;
+
         }
 
         private void MensajeRecibidoWebSocket(string json)
@@ -56,9 +59,9 @@ namespace RiskWPF
         private void ProcesaMensajeDelServidor(string json)
         {
             var obj = JObject.Parse(json);
-            var action = obj["action"]?.ToString();
+            var action = obj["request"]?.ToString();
 
-            if (action == "update-jugadores")
+            if (action == Constants.ActualizarSala)
             {
                 var jugadoresArray = obj["jugadores"];
                 if (jugadoresArray != null)
@@ -67,28 +70,26 @@ namespace RiskWPF
                     foreach (var jToken in jugadoresArray)
                     {
                         var jugador = jToken.ToObject<Jugador>();
-                        Utils.partida.jugadorList.Add(jugador);
+                        Utils.sala.Jugadores.Add(jugador);
                     }
                     lbJugadores.ItemsSource = null;
                     lbJugadores.ItemsSource = Utils.partida.jugadorList;
                 }
             }
-            else if (action == "empezar")
+            else if (action == Constants.EmpezarPartida)
             {
+                Conection.StopListening();
                 IniciarJuego();
             }
         }
 
         private void btnInciar_Click(object sender, RoutedEventArgs e)
         {
-            //if(!Utils.demo)
-            //    jugadores = Conection.ReciveObject(); //Actualizar jugadores 
-
-
             if (cboColor.SelectedIndex == -1) return;
+            
 
             int listo = 0;
-            foreach(Jugador jugador in Utils.partida.jugadorList)
+            foreach(Jugador jugador in Utils.sala.Jugadores)
             {
                 if(jugador.Estado)
                 {
@@ -96,8 +97,9 @@ namespace RiskWPF
                 }
             }
 
-            if (listo == Utils.partida.jugadorList.Count)
+            if (listo == Utils.sala.Jugadores.Count)
             {
+                Utils.partida.jugadorList = Utils.sala.Jugadores; //Temporal
                 IniciarJuego();
             }
             
@@ -105,24 +107,44 @@ namespace RiskWPF
 
         private void IniciarJuego()
         {
-            if (!Utils.demo) return;
-
-            Utils.partida.jugadorList.FirstOrDefault(e => e.Id == Utils.user.Id).Color = cboColor.SelectedValue.ToString();
-
             Window.GetWindow(this).Content = new JuegoPage();
         }
 
         private void btnListo_Click(object sender, RoutedEventArgs e)
         {
-            Jugador j = Utils.partida.jugadorList.FirstOrDefault(e => e.Id == Utils.user.Id);
+            Jugador j = Utils.sala.Jugadores.FirstOrDefault(e => e.UserId == Utils.user.Id);
 
             j.Estado = !j.Estado;
+            UserChanged();
         }
 
         private void btnSalir_Click(object sender, RoutedEventArgs e)
         {
-            Window window = Window.GetWindow(this);
-            window.Content = null;
+            Utils.sala.Jugadores.Clear();
+            if(!Utils.demo)
+            {
+                Conection.StopListening();
+                Conection.SendMessageJoinLeaveSala(Utils.sala.Id, Utils.user.Id, false);
+            }
+                
+
+            DependencyObject parent = this;
+            while (parent != null && !(parent is Frame))
+                parent = VisualTreeHelper.GetParent(parent);
+
+            if (parent is Frame frame)
+                frame.Content = null;
+        }
+
+        private void cboColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Utils.sala.Jugadores.FirstOrDefault(e => e.UserId == Utils.user.Id).Color = cboColor.SelectedValue.ToString();
+            UserChanged();
+        }
+
+        private void UserChanged()
+        {
+            // Mandar mensaje que he cambiado
         }
     }
 }

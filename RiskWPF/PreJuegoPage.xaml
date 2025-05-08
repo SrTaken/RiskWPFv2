@@ -22,6 +22,7 @@
             <Grid Margin="35">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -35,10 +36,19 @@
                            Foreground="#FFD700"
                            Margin="0,0,0,15"
                            HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="1"
+                            Text="Lobby de locos"
+                           x:Name="txtLobbyName"
+                            FontFamily="Old English Text MT"
+                            FontSize="30"
+                            FontWeight="Bold"
+                            Foreground="#FFD700"
+                            Margin="0,0,0,15"
+                            HorizontalAlignment="Center"/>
 
                 <!-- Lista de jugadores -->
                 <ListBox x:Name="lbJugadores"
-                         Grid.Row="1"
+                         Grid.Row="2"
                          Margin="0,0,0,10"
                          MinHeight="120"
                          Background="#C9FFFFFF"
@@ -66,7 +76,7 @@
                 </ListBox>
 
                 <!-- ComboBox de color -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
                     <TextBlock Text="Color:" VerticalAlignment="Center"
                                FontFamily="Old English Text MT"
                                FontSize="22"
@@ -79,11 +89,12 @@
                         Foreground="#384"
                         Background="#FFF9E5"
                         SelectedItem="{Binding Color}"
-                        x:Name="cboColor" />
+                        x:Name="cboColor" 
+                        SelectionChanged="cboColor_SelectionChanged"/>
                 </StackPanel>
 
                 <!-- Botones -->
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="Salir"
                             Background="#9C3434"
                             Foreground="#FFD700"

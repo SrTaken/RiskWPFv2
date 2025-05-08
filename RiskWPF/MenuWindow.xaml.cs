@@ -32,13 +32,16 @@ namespace RiskWPF
         
         private void JugarBoton_Click(object sender, RoutedEventArgs e)
         {
-            
+            FrameJuego.Navigate(new LobbysPage());
+            //LobbysPage lobbyPage = new();
+            //this.Content = lobbyPage;
         }
 
         private void CreateBoton_Click(object sender, RoutedEventArgs e)
         {
-            PreJuegoPage juegoPage = new();
-            this.Content = juegoPage;
+            FrameJuego.Navigate(new SalaCreationPage());
+            //PreJuegoPage juegoPage = new();
+            //this.Content = juegoPage;
         }
 
         private void CerrarBoton_Click(object sender, RoutedEventArgs e)

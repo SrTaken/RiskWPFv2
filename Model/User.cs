@@ -18,7 +18,7 @@ namespace Model
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        [JsonProperty("login")]
+        [JsonProperty("username")]
         public string Username
         {
             get { return username; }

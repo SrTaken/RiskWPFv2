@@ -82,5 +82,6 @@
             </Grid>
         </Border>
         <controls:UserDataControl Margin="40" VerticalAlignment="Top" Width="300" HorizontalAlignment="Right"  x:Name="ucUser" Grid.Column="1" MyUser="{Binding}"/>
+        <Frame x:Name="FrameJuego" NavigationUIVisibility="Hidden" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.RowSpan="4" Grid.Column="2"/>
     </Grid>
 </Window>
