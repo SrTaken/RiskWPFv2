@@ -50,7 +50,9 @@
                               Background="#C9FFFFFF"
                               BorderThickness="0"
                               HorizontalContentAlignment="Center"
-                              SelectionChanged="lvLobbys_SelectionChanged">
+                              SelectionChanged="lvLobbys_SelectionChanged"
+                              ScrollViewer.VerticalScrollBarVisibility="Visible"
+                              MaxHeight="225">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Border Margin="0,3"

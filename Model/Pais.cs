@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -10,7 +11,7 @@ namespace Model
     public class Pais
     {
         public string nombre;
-        public string color;
+        [JsonIgnore]
         public Color color1;
         public int jugadorId;
 

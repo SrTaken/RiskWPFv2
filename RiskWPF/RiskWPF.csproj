@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>peruano.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,10 @@
     <None Remove="Assets\madera.jpg" />
     <None Remove="Assets\Risk_board.png" />
     <None Remove="Assets\Risk_board_map.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="peruano.ico" />
   </ItemGroup>
 
   <ItemGroup>

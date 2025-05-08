@@ -36,12 +36,12 @@ namespace RiskWPF
             {
                 //Utils.sala.Nombre = txtNombreLobby.Text;
                 //Utils.sala.Jugadores.Add(new Jugador(Utils.user));
-                string json = "{\"response\":\"Sala creada con éxito\",\"sala\":{\"id\":4,\"nombre\":\"s\",\"jugadores\":[{\"id\":0,\"user_id\":1,\"nombre\":\"test1\",\"partida_id\":\"4\",\"estado\":false,\"colors\":null}],\"maxPlayers\":3}}";
+                string json = "{\"response\":\"Sala creada con éxito\",\"sala\":{\"id\":4,\"nombre\":\"s\",\"jugadores\":[{\"id\":0,\"user_id\":3,\"nombre\":\"test1\",\"partida_id\":\"4\",\"estado\":false,\"colors\":null}],\"maxPlayers\":3}}";
                 Utils.sala = Utils.getSalaFromRequest(json);
             }
             else
             {
-                Conection.SendMessageSala(Utils.user, txtNombreLobby.Text);
+                await Conection.SendMessageSala(Utils.user, txtNombreLobby.Text);
                 string sala = await Conection.ReceiveMessage();
                 Utils.sala = Utils.getSalaFromRequest(sala);
             }

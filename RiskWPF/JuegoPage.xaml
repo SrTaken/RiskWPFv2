@@ -7,12 +7,17 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="JuegoPage">
-
+    <Page.Resources>
+        <SolidColorBrush x:Key="FaseRefuerzo_BG" Color="#FFFCE8B4"/>
+        <SolidColorBrush x:Key="FaseAtacar_BG" Color="#FFFFCFC7"/>
+        <SolidColorBrush x:Key="FaseReagrupar_BG" Color="#FFCBF5B1"/>
+    </Page.Resources>
     <Grid Background="AntiqueWhite" x:Name="gridPrincipal">
         <Image x:Name="MapaVisible" Source="Assets/Risk_board.png" MouseLeftButtonDown="MapaVisible_MouseLeftButtonDown" MouseMove="MapaVisible_MouseMove"/>
         <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False"/>
         <Canvas x:Name="OverlayCanvasHover" IsHitTestVisible="False"/>
 
+        <!-- Dados -->
         <Grid VerticalAlignment="Center" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -32,6 +37,76 @@
             <controls:D6Control Width="150" Height="150" MyNumber="4" x:Name="DadoDerecho1" Grid.Row="1" Grid.Column="1"/>
             <controls:D6Control Width="150" Height="150" MyNumber="6" x:Name="DadoDerecho2" Grid.Row="2" Grid.Column="1"/>
             <controls:D6Control Width="150" Height="150" MyNumber="1" x:Name="DadoDerecho3" Grid.Row="3" Grid.Column="1"/>
+        </Grid>
+
+        <!-- Otros datos-->
+        <Grid>
+            <ListView x:Name="lvJugadores"
+                    Width="250"
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="0,30,15,30"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    
+                    >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <controls:JugadorMiniFichaControl MyJugador="{Binding}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            
+            <StackPanel Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,22"
+            Panel.ZIndex="10"
+            >
+    <!-- Refuerzo -->
+    <Border x:Name="BordeFaseRefuerzo"
+            Margin="10"
+            Padding="13,9"
+            CornerRadius="18"
+            BorderThickness="3"
+            BorderBrush="#D4AF37"
+            Background="{DynamicResource FaseRefuerzo_BG}">
+        <TextBlock Text="Refuerzo"
+                   FontFamily="Old English Text MT"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Foreground="#D4AF37"/>
+    </Border>
+    <!-- Atacar -->
+    <Border x:Name="BordeFaseAtacar"
+            Margin="10"
+            Padding="13,9"
+            CornerRadius="18"
+            BorderThickness="3"
+            BorderBrush="#CB3333"
+            Background="{DynamicResource FaseAtacar_BG}">
+        <TextBlock Text="Atacar"
+                   FontFamily="Old English Text MT"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Foreground="#CB3333"/>
+    </Border>
+    <!-- Reagrupar -->
+    <Border x:Name="BordeFaseReagrupar"
+            Margin="10"
+            Padding="13,9"
+            CornerRadius="18"
+            BorderThickness="3"
+            BorderBrush="#358E26"
+            Background="{DynamicResource FaseReagrupar_BG}">
+        <TextBlock Text="Reagrupar"
+                   FontFamily="Old English Text MT"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Foreground="#358E26"/>
+    </Border>
+</StackPanel>
         </Grid>
     </Grid>
 </Page>

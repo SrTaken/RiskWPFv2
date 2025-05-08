@@ -46,7 +46,7 @@ namespace RiskWPF
             }
             else
             {
-                Conection.SendMessage(Constants.ListaSalas);
+                await Conection.SendMessage(Constants.ListaSalas);
                 json = await Conection.ReceiveMessage();
 
             }
@@ -83,7 +83,7 @@ namespace RiskWPF
                 }
                 else
                 {
-                    Conection.SendMessageJoinLeaveSala(salaId, Utils.user.Id, true);
+                    await Conection.SendMessageJoinLeaveSala(salaId, Utils.user.Id, true);
                     json = await Conection.ReceiveMessage();
 
                 }
@@ -104,5 +104,6 @@ namespace RiskWPF
                 this.NavigationService.Navigate(new PreJuegoPage());
             }
         }
+
     }
 }

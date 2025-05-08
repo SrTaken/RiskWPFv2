@@ -16,7 +16,7 @@ namespace Datos
     {
         public static ClientWebSocket Client; 
         public static event Action<string> OnMessageReceived; // Un evento
-        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(1000);
 
         private static Task listenTask;
         private static CancellationTokenSource listenCts;
@@ -26,13 +26,14 @@ namespace Datos
             string host = ConfigurationManager.AppSettings["serverURl"];
             Client = new ClientWebSocket();
             await Client.ConnectAsync(new Uri(host), CancellationToken.None);
+            //StartListening();
         }
         public static void StartListening()
         {
             if (listenTask == null || listenTask.IsCompleted)
             {
                 listenCts = new CancellationTokenSource();
-                //listenTask = ListenAsync(listenCts.Token);
+                listenTask = ListenAsync(listenCts.Token);
             }
         }
 
@@ -49,10 +50,6 @@ namespace Datos
                 {
                     string msg = await ReceiveMessage();
                     OnMessageReceived?.Invoke(msg);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
                 }
                 catch
                 {
@@ -98,7 +95,7 @@ namespace Datos
         public static async Task<string> ReceiveMessage()
         {
             Debug.WriteLine("Recibiendo mensaje...");
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[2024];
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
 
             using (var cts = new CancellationTokenSource(Timeout))
@@ -129,8 +126,14 @@ namespace Datos
 
         public static async Task SendMessageJoinLeaveSala(int salaId, int id, bool join)
         {
-            string action = join ? Constants.JoinSala : Constants.SalirSala;
-            string json = "{\"request\":\"" + action + "\",\"user\":" + id + ",\"sala\":" + salaId + "}";
+            string json;
+            if (join){
+                json = "{\"request\":\"" + Constants.JoinSala + "\",\"user\":" + id + ",\"sala\":" + salaId + "}";
+            }
+            else
+            {
+                json = "{\"request\":\"" + Constants.SalirSala + "\",\"idUsuari\":" + id + ",\"idSala\":" + salaId + "}";
+            }
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);

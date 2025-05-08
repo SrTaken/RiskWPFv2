@@ -32,8 +32,7 @@ namespace RiskWPF
             InitializeComponent();
 
             cboColor.ItemsSource = colores;
-            //Conection.StartListening();
-            Conection.OnMessageReceived += MensajeRecibidoWebSocket;
+            
 
             if (Utils.demo)
             {
@@ -41,7 +40,12 @@ namespace RiskWPF
                 Utils.sala.Jugadores.Add(new Jugador(99, "Usuario2", "Azul", true));
                 Utils.sala.Jugadores.Add(new Jugador(100, "Usuario3", "Amarillo", true));
                 //Utils.partida.jugadorList.Add(new Jugador(Utils.user));
-
+            }
+            else
+            {
+                //Conection.StartListening();
+                Conection.OnMessageReceived += MensajeRecibidoWebSocket;
+                btnIniciar.Visibility = Visibility.Collapsed;
             }
             txtLobbyName.Text = Utils.sala.Nombre;
             lbJugadores.ItemsSource = Utils.sala.Jugadores;
@@ -59,8 +63,17 @@ namespace RiskWPF
         private void ProcesaMensajeDelServidor(string json)
         {
             var obj = JObject.Parse(json);
-            var action = obj["request"]?.ToString();
+            var action = obj["response"]?.ToString();
 
+            if (action == "leaveSalaRS")
+            {
+                DependencyObject parent = this;
+                while (parent != null && !(parent is Frame))
+                    parent = VisualTreeHelper.GetParent(parent);
+
+                if (parent is Frame frame)
+                    frame.Content = null;
+            }
             if (action == Constants.ActualizarSala)
             {
                 var jugadoresArray = obj["jugadores"];
@@ -79,6 +92,7 @@ namespace RiskWPF
             else if (action == Constants.EmpezarPartida)
             {
                 Conection.StopListening();
+                Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
                 IniciarJuego();
             }
         }
@@ -118,22 +132,29 @@ namespace RiskWPF
             UserChanged();
         }
 
-        private void btnSalir_Click(object sender, RoutedEventArgs e)
+        private async void btnSalir_Click(object sender, RoutedEventArgs e)
         {
             Utils.sala.Jugadores.Clear();
             if(!Utils.demo)
             {
-                Conection.StopListening();
-                Conection.SendMessageJoinLeaveSala(Utils.sala.Id, Utils.user.Id, false);
+                
+                await Conection.SendMessageJoinLeaveSala(Utils.sala.Id, Utils.user.Id, false);
+                //string json = await Conection.ReceiveMessage(); 
+
+                //Conection.StopListening();
+                //Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
+
             }
+                DependencyObject parent = this;
+                while (parent != null && !(parent is Frame))
+                    parent = VisualTreeHelper.GetParent(parent);
+
+                if (parent is Frame frame)
+                    frame.Content = null;
+            
                 
 
-            DependencyObject parent = this;
-            while (parent != null && !(parent is Frame))
-                parent = VisualTreeHelper.GetParent(parent);
-
-            if (parent is Frame frame)
-                frame.Content = null;
+          
         }
 
         private void cboColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -144,6 +165,10 @@ namespace RiskWPF
 
         private void UserChanged()
         {
+            if (!Utils.demo)
+            {
+
+            }
             // Mandar mensaje que he cambiado
         }
     }

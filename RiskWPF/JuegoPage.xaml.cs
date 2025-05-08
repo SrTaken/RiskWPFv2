@@ -27,54 +27,6 @@ namespace RiskWPF
         private WriteableBitmap mapaColoresWB;
         private Pais paisResaltado = null;
 
-
-        //En vez de String hacer un Objeto Pais
-        //private Dictionary<Color, string> colorAPais = new Dictionary<Color, string>
-        //{
-        //    { (Color)ColorConverter.ConvertFromString("#FF0000"), "Alaska" },
-        //    { (Color)ColorConverter.ConvertFromString("#00FF00"), "Northwest Territory" },
-        //    { (Color)ColorConverter.ConvertFromString("#0000FF"), "Greenland" },
-        //    { (Color)ColorConverter.ConvertFromString("#FFFF00"), "Alberta" },
-        //    { (Color)ColorConverter.ConvertFromString("#FF00FF"), "Ontario" },
-        //    { (Color)ColorConverter.ConvertFromString("#00FFFF"), "Quebec" },
-        //    { (Color)ColorConverter.ConvertFromString("#800000"), "Western United States" },
-        //    { (Color)ColorConverter.ConvertFromString("#008000"), "Eastern United States" },
-        //    { (Color)ColorConverter.ConvertFromString("#000080"), "Central America" },
-        //    { (Color)ColorConverter.ConvertFromString("#808000"), "Venezuela" },
-        //    { (Color)ColorConverter.ConvertFromString("#800080"), "Peru" },
-        //    { (Color)ColorConverter.ConvertFromString("#008080"), "Brazil" },
-        //    { (Color)ColorConverter.ConvertFromString("#C0C0C0"), "Argentina" },
-        //    { (Color)ColorConverter.ConvertFromString("#FFA500"), "North Africa" },
-        //    { (Color)ColorConverter.ConvertFromString("#A52A2A"), "Egypt" },
-        //    { (Color)ColorConverter.ConvertFromString("#7FFF00"), "East Africa" },
-        //    { (Color)ColorConverter.ConvertFromString("#DC143C"), "Congo" },
-        //    { (Color)ColorConverter.ConvertFromString("#00CED1"), "South Africa" },
-        //    { (Color)ColorConverter.ConvertFromString("#FFD700"), "Madagascar" },
-        //    { (Color)ColorConverter.ConvertFromString("#4B0082"), "Western Europe" },
-        //    { (Color)ColorConverter.ConvertFromString("#ADFF2F"), "Southern Europe" },
-        //    { (Color)ColorConverter.ConvertFromString("#FF69B4"), "Northern Europe" },
-        //    { (Color)ColorConverter.ConvertFromString("#1E90FF"), "Great Britain" },
-        //    { (Color)ColorConverter.ConvertFromString("#B22222"), "Iceland" },
-        //    { (Color)ColorConverter.ConvertFromString("#228B22"), "Scandinavia" },
-        //    { (Color)ColorConverter.ConvertFromString("#DAA520"), "Ukraine" },
-        //    { (Color)ColorConverter.ConvertFromString("#B8860B"), "Ural" },
-        //    { (Color)ColorConverter.ConvertFromString("#9932CC"), "Siberia" },
-        //    { (Color)ColorConverter.ConvertFromString("#00BFFF"), "Yakutsk" },
-        //    { (Color)ColorConverter.ConvertFromString("#FF4500"), "Kamchatka" },
-        //    { (Color)ColorConverter.ConvertFromString("#2E8B57"), "Irkutsk" },
-        //    { (Color)ColorConverter.ConvertFromString("#8B0000"), "Mongolia" },
-        //    { (Color)ColorConverter.ConvertFromString("#E9967A"), "Japan" },
-        //    { (Color)ColorConverter.ConvertFromString("#8FBC8F"), "Afghanistan" },
-        //    { (Color)ColorConverter.ConvertFromString("#483D8B"), "China" },
-        //    { (Color)ColorConverter.ConvertFromString("#BDB76B"), "Middle East" },
-        //    { (Color)ColorConverter.ConvertFromString("#556B2F"), "India" },
-        //    { (Color)ColorConverter.ConvertFromString("#8B008B"), "Siam" },
-        //    { (Color)ColorConverter.ConvertFromString("#20B2AA"), "Indonesia" },
-        //    { (Color)ColorConverter.ConvertFromString("#F08080"), "New Guinea" },
-        //    { (Color)ColorConverter.ConvertFromString("#4682B4"), "Western Australia" },
-        //    { (Color)ColorConverter.ConvertFromString("#D2691E"), "Eastern Australia" }
-        //};
-
         private Dictionary<Color, Pais> colorAPais = new Dictionary<Color, Pais>
         {
             { (Color)ColorConverter.ConvertFromString("#FF0000"), new Pais("Alaska") },
@@ -129,6 +81,12 @@ namespace RiskWPF
             if (Utils.demo)
             {
                 Utils.partida.jugadorTurno = Utils.user.Id;
+                lvJugadores.ItemsSource = Utils.partida.jugadorList;
+
+                //Decir que fase estamos 
+                BordeFaseRefuerzo.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
+                BordeFaseAtacar.Background = (Brush)FindResource("FaseAtacar_BG");
+                BordeFaseReagrupar.Background = (Brush)FindResource("FaseAtacar_BG");
             }
         }
 

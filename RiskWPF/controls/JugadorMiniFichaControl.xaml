@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="RiskWPF.controls.JugadorMiniFichaControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="36" Width="220">
+    <Border CornerRadius="18"
+            BorderThickness="2"
+            BorderBrush="Gray">
+        <Border.Background>
+            <ImageBrush ImageSource="/Assets/madera.jpg" Stretch="UniformToFill"/>
+        </Border.Background>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+            <Ellipse Width="20" Height="20" Margin="0,0,12,0" x:Name="elipseColor"/>
+            <TextBlock Text="{Binding Nombre}"
+                       FontWeight="Bold"
+                       FontFamily="Old English Text MT"
+                       FontSize="19"
+                       Foreground="#FFD700"/>
+        </StackPanel>
+    </Border>
+</UserControl>
