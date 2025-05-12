@@ -14,6 +14,9 @@ namespace Model
         [JsonIgnore]
         public Color color1;
         public int jugadorId;
+        public int CentroX;
+        public int CentroY;
+        public int Tropas;
 
         public Pais(string nombre)
         {

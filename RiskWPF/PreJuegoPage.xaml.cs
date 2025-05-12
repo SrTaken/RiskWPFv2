@@ -65,8 +65,9 @@ namespace RiskWPF
             var obj = JObject.Parse(json);
             var action = obj["response"]?.ToString();
 
-            if (action == "leaveSalaRS")
+            if (action == Constants.RS.SalirSala)
             {
+                Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
                 DependencyObject parent = this;
                 while (parent != null && !(parent is Frame))
                     parent = VisualTreeHelper.GetParent(parent);
@@ -74,24 +75,24 @@ namespace RiskWPF
                 if (parent is Frame frame)
                     frame.Content = null;
             }
-            if (action == Constants.ActualizarSala)
+            else if (json.Contains("response") && JObject.Parse(json)?.Property("response")?.Value.ToString() == Constants.RS.ActualizarSala)
             {
                 var jugadoresArray = obj["jugadores"];
                 if (jugadoresArray != null)
                 {
-                    Utils.partida.jugadorList.Clear();
+                    Utils.sala.Jugadores.Clear();
                     foreach (var jToken in jugadoresArray)
                     {
                         var jugador = jToken.ToObject<Jugador>();
                         Utils.sala.Jugadores.Add(jugador);
                     }
                     lbJugadores.ItemsSource = null;
-                    lbJugadores.ItemsSource = Utils.partida.jugadorList;
+                    lbJugadores.ItemsSource = Utils.sala.Jugadores;
                 }
             }
-            else if (action == Constants.EmpezarPartida)
+            else if (action == Constants.RS.EmpezarPartida)
             {
-                Conection.StopListening();
+                //Conection.StopListening();
                 Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
                 IniciarJuego();
             }
@@ -127,9 +128,13 @@ namespace RiskWPF
         private void btnListo_Click(object sender, RoutedEventArgs e)
         {
             Jugador j = Utils.sala.Jugadores.FirstOrDefault(e => e.UserId == Utils.user.Id);
+            if (j.Color == null)
+            {
+                return;
+            }
 
             j.Estado = !j.Estado;
-            UserChanged();
+            UserChangedAsync();
         }
 
         private async void btnSalir_Click(object sender, RoutedEventArgs e)
@@ -145,29 +150,33 @@ namespace RiskWPF
                 //Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
 
             }
+            else
+            {
                 DependencyObject parent = this;
                 while (parent != null && !(parent is Frame))
                     parent = VisualTreeHelper.GetParent(parent);
 
                 if (parent is Frame frame)
                     frame.Content = null;
-            
-                
-
+            }
           
         }
 
         private void cboColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Utils.sala.Jugadores.FirstOrDefault(e => e.UserId == Utils.user.Id).Color = cboColor.SelectedValue.ToString();
-            UserChanged();
+            UserChangedAsync();
         }
 
-        private void UserChanged()
+        private async Task UserChangedAsync()
         {
-            if (!Utils.demo)
+            if (Utils.demo)
             {
 
+            }
+            else
+            {
+                await Conection.SendMessageUpdateSala(Utils.sala, Constants.RQ.ActualizarSala);
             }
             // Mandar mensaje que he cambiado
         }

@@ -15,6 +15,7 @@ namespace Model
         private string password;
         private int id;
         private string nombre;
+        private string token;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -44,6 +45,13 @@ namespace Model
         {
             get { return nombre; }
             set { nombre = value; }
+        }
+
+        [JsonProperty("token")]
+        public string Token
+        {
+            get { return token; }
+            set { token = value; }
         }
 
 

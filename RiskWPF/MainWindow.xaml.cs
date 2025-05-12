@@ -1,6 +1,7 @@
 ﻿using Datos;
 using Model;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -29,7 +30,7 @@ namespace RiskWPF
                 Conection.startConection();
 
                 //Conection.StartListening();
-                //Conection.OnMessageReceived += MensajeRecibidoWebSocket;
+                Conection.OnMessageReceived += MensajeRecibidoWebSocket;
             }
                 
         }
@@ -55,6 +56,7 @@ namespace RiskWPF
 
                 MenuWindow menuWindow = new MenuWindow();
                 menuWindow.Show();
+                Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
                 this.Close();
             }
             else if (JObject.Parse(json)?.Property("code")?.Value.ToString() == "422")
@@ -86,41 +88,41 @@ namespace RiskWPF
 
             string result = "";
             if (Utils.demo)
+            {
                 result = "{\"response\":\"loginRS\",\"status\":\"Bien\",\"code\":200,\"user\":{\"id\":3,\"nom\":\"test3\",\"login\":\"test3\",\"password\":\"81DC9BDB52D04DC20036DBD8313ED055\",\"avatar\":\"\",\"wins\":0,\"games\":0}}";
+
+                if (result == null)
+                {
+                    MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else if (JObject.Parse(result)?.Property("code")?.Value.ToString() == "200")
+                {
+                    Utils.user = Utils.GetUserFromRequest(result);
+
+                    MenuWindow menuWindow = new MenuWindow();
+                    menuWindow.Show();
+                    this.Close();
+                }
+                else if (JObject.Parse(result)?.Property("code")?.Value.ToString() == "422")
+                {
+                    MessageBox.Show("Invalid username or password", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else if (JObject.Parse(result)?.Property("code")?.Value.ToString() == "101")
+                {
+                    MessageBox.Show("Timeout", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
             else
             {
-                await Conection.SendMessage(Utils.user, Constants.Login);
-                result = await Conection.ReceiveMessage();
+                await Conection.SendMessage(Utils.user, Constants.RQ.Login);
+                //result = await Conection.ReceiveMessage();
             }
 
-            if (result == null)
-            {
-                MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            else if (JObject.Parse(result)?.Property("code")?.Value.ToString() == "200")
-            {
-                Utils.user = Utils.GetUserFromRequest(result);
 
-                MenuWindow menuWindow = new MenuWindow();
-                menuWindow.Show();
-                this.Close();
-            }
-            else if (JObject.Parse(result)?.Property("code")?.Value.ToString() == "422")
-            {
-                MessageBox.Show("Invalid username or password", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            else if (JObject.Parse(result)?.Property("code")?.Value.ToString() == "101")
-            {
-                MessageBox.Show("Timeout", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            else
-            {
-                MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Conection.CloseConnection();
         }
     }
 }

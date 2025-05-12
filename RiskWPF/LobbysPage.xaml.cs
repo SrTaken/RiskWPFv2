@@ -28,9 +28,35 @@ namespace RiskWPF
         public LobbysPage()
         {
             InitializeComponent();
+            Conection.OnMessageReceived += MensajeRecibidoWebSocket;
             GetSalasAsync();
         }
+        private void MensajeRecibidoWebSocket(string json)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ProcesaMensajeDelServidor(json);
+            });
+        }
 
+        private void ProcesaMensajeDelServidor(string json)
+        {
+            if (JObject.Parse(json)?.Property("response")?.Value.ToString() == Constants.RS.ListaSalas)
+            {
+                List<Sala> salas = Utils.getSalasFromRequest(json);
+                lvLobbys.ItemsSource = salas;
+            }
+            else if(JObject.Parse(json)?.Property("response")?.Value.ToString() == Constants.RS.JoinSala)
+            {
+                Utils.sala = Utils.getSalaFromRequest(json);
+                Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
+                this.NavigationService.Navigate(new PreJuegoPage());
+            }
+            else
+            {
+                MessageBox.Show("Error inesperado payaso", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private async Task GetSalasAsync()
         {
             string json = "";
@@ -43,17 +69,16 @@ namespace RiskWPF
                 //    new Sala { Id = 3, Nombre = "Random", MaxJugadores = 3, Jugadores = new List<Jugador> { new Jugador(), new Jugador(), new Jugador() } }
                 //};
                 json = "{\"response\":\"getSalasRS\",\"salas\":[{\"id\":1,\"nombre\":\"dada\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":2,\"nombre\":\"Jose\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":3,\"nombre\":\"JoseMaria\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":4,\"nombre\":\"s\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":5,\"nombre\":\"Nombre\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":6,\"nombre\":\"Prueba1\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":7,\"nombre\":\"asjdkwa\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":8,\"nombre\":\"hola\",\"jugadores\":[],\"maxPlayers\":3},{\"id\":9,\"nombre\":\"Pirulo2\",\"jugadores\":[],\"maxPlayers\":3}],\"code\":200}";
+                if (!string.IsNullOrEmpty(json))
+                {
+                    List<Sala> salas = Utils.getSalasFromRequest(json);
+                    lvLobbys.ItemsSource = salas;
+                }
             }
             else
             {
-                await Conection.SendMessage(Constants.ListaSalas);
-                json = await Conection.ReceiveMessage();
-
-            }
-            if (!string.IsNullOrEmpty(json))
-            {
-                List<Sala> salas = Utils.getSalasFromRequest(json);
-                lvLobbys.ItemsSource = salas;
+                await Conection.SendMessage(Constants.RQ.ListaSalas, Utils.user.Id);
+                //json = await Conection.ReceiveMessage();
             }
         }
 
@@ -64,6 +89,7 @@ namespace RiskWPF
 
         private void btnSalir_Click(object sender, RoutedEventArgs e)
         {
+            Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
             DependencyObject parent = this;
             while (parent != null && !(parent is Frame))
                 parent = VisualTreeHelper.GetParent(parent);
@@ -79,29 +105,28 @@ namespace RiskWPF
                 string json = "";
                 if (Utils.demo)
                 {
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
 
+                    if (JObject.Parse(json)?.Property("request")?.Value.ToString() == "KO")
+                    {
+                        MessageBox.Show("Sala llena", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    Utils.sala = Utils.getSalaFromRequest(json);
+                    this.NavigationService.Navigate(new PreJuegoPage());
                 }
                 else
                 {
                     await Conection.SendMessageJoinLeaveSala(salaId, Utils.user.Id, true);
-                    json = await Conection.ReceiveMessage();
-
+                    //json = await Conection.ReceiveMessage();
                 }
 
-                if(string.IsNullOrEmpty(json))
-                {
-                    MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
 
-                if (JObject.Parse(json)?.Property("request")?.Value.ToString() == "KO")
-                {
-                    MessageBox.Show("Sala llena", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                Utils.sala = Utils.getSalaFromRequest(json);
-                this.NavigationService.Navigate(new PreJuegoPage());
             }
         }
 

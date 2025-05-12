@@ -105,8 +105,21 @@
                    FontSize="28"
                    FontWeight="Bold"
                    Foreground="#358E26"/>
-    </Border>
-</StackPanel>
+                </Border>
+            </StackPanel>
+            <Border x:Name="TurnWaitOverlay"
+            Background="#AA000000"
+            Visibility="Collapsed"
+            IsHitTestVisible="True"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+        <TextBlock Text="Espera tu turno..." 
+                   Foreground="White"
+                   FontSize="44"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+            </Border>
         </Grid>
     </Grid>
 </Page>

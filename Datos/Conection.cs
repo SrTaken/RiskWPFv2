@@ -14,26 +14,26 @@ namespace Datos
 {
     public class Conection
     {
-        public static ClientWebSocket Client; 
-        public static event Action<string> OnMessageReceived; // Un evento
+        public static ClientWebSocket Client;
+        public static event Action<string> OnMessageReceived;
         private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(1000);
 
         private static Task listenTask;
         private static CancellationTokenSource listenCts;
 
-        public async static void startConection()
+        public static async void startConection()
         {
             string host = ConfigurationManager.AppSettings["serverURl"];
             Client = new ClientWebSocket();
             await Client.ConnectAsync(new Uri(host), CancellationToken.None);
-            //StartListening();
+            StartListening();
         }
         public static void StartListening()
         {
             if (listenTask == null || listenTask.IsCompleted)
             {
                 listenCts = new CancellationTokenSource();
-                listenTask = ListenAsync(listenCts.Token);
+                listenTask = Task.Run(() => ListenAsync(listenCts.Token));  // FORZAMOS SEGUNDO PLANO
             }
         }
 
@@ -42,19 +42,29 @@ namespace Datos
             if (listenCts != null && !listenCts.IsCancellationRequested)
                 listenCts.Cancel();
         }
-        public static async Task ListenAsync(CancellationToken cancellationToken)
+
+        private static async Task ListenAsync(CancellationToken cancellationToken)
         {
-            while (Client != null && Client.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
+            try
             {
-                try
+                while (Client != null && Client.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
                 {
-                    string msg = await ReceiveMessage();
-                    OnMessageReceived?.Invoke(msg);
+                    try
+                    {
+                        string msg = await ReceiveMessage();
+                        if (msg != null)
+                            OnMessageReceived?.Invoke(msg);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine("Error en ListenAsync: " + ex.Message);
+                        break;
+                    }
                 }
-                catch
-                {
-                    break;
-                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fatal Listener error: " + ex);
             }
         }
 
@@ -69,23 +79,33 @@ namespace Datos
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
             await Client.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
         }
+        public static async Task SendMessageUpdateSala(object message, string consulta)
+        {
+            string json = JsonConvert.SerializeObject(message);
+
+            json = "{\"request\":\"" + consulta + "\",\"sala\":{" + json.Substring(1)+"}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
 
         public static async Task SendMessageSala(object user, string nombreSala)
         {
             string usuarioJson = JsonConvert.SerializeObject(user);
 
-            string json = "{\"request\":\"" + Constants.CrearSala + "\",\"name\":\"" + nombreSala + "\",\"user\":" + usuarioJson + "}";
+            string json = "{\"request\":\"" + Constants.RQ.CrearSala + "\",\"name\":\"" + nombreSala + "\",\"user\":" + usuarioJson + "}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
             await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
         }
 
-        public static async Task SendMessage(string consulta)
+        public static async Task SendMessage(string consulta, int userid)
         {
             string json;
 
-            json = "{\"request\":\"" + consulta + "\"}";
+            json = "{\"request\":\"" + consulta + "\",\"user\":" + userid+"}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -95,7 +115,7 @@ namespace Datos
         public static async Task<string> ReceiveMessage()
         {
             Debug.WriteLine("Recibiendo mensaje...");
-            byte[] buffer = new byte[2024];
+            byte[] buffer = new byte[2024]; 
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
 
             using (var cts = new CancellationTokenSource(Timeout))
@@ -128,11 +148,11 @@ namespace Datos
         {
             string json;
             if (join){
-                json = "{\"request\":\"" + Constants.JoinSala + "\",\"user\":" + id + ",\"sala\":" + salaId + "}";
+                json = "{\"request\":\"" + Constants.RQ.JoinSala + "\",\"user\":" + id + ",\"sala\":" + salaId + "}";
             }
             else
             {
-                json = "{\"request\":\"" + Constants.SalirSala + "\",\"idUsuari\":" + id + ",\"idSala\":" + salaId + "}";
+                json = "{\"request\":\"" + Constants.RQ.SalirSala + "\",\"idUsuari\":" + id + ",\"idSala\":" + salaId + "}";
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);

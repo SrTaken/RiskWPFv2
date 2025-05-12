@@ -88,10 +88,22 @@ namespace RiskWPF
                 BordeFaseAtacar.Background = (Brush)FindResource("FaseAtacar_BG");
                 BordeFaseReagrupar.Background = (Brush)FindResource("FaseAtacar_BG");
             }
+            ActualizarTurno();
         }
+        public void ActualizarTurno()
+        {
+            bool esMiTurno = true;//= Utils.user.Id == Utils.partida.jugadorTurno;
 
+            TurnWaitOverlay.Visibility = esMiTurno ? Visibility.Collapsed : Visibility.Visible;
+            MapaVisible.IsEnabled = esMiTurno;
+            OverlayCanvas.IsEnabled = esMiTurno;
+            OverlayCanvasHover.IsEnabled = esMiTurno;
+        }
         private void MapaVisible_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            //if (TurnWaitOverlay.Visibility == Visibility.Visible)
+            //    return;
+
             Point pos = e.GetPosition(MapaVisible);
 
             int x = (int)(pos.X * mapaColoresWB.PixelWidth / MapaVisible.ActualWidth);
@@ -115,7 +127,7 @@ namespace RiskWPF
         }
 
 
-        private void RepintarLienzo()   
+        private void RepintarLienzo()
         {
             OverlayCanvas.Children.Clear();
 
@@ -123,8 +135,8 @@ namespace RiskWPF
             foreach (var paisEntry in colorAPais)
             {
                 //if(paisEntry.Value.color1 == (Color)ColorConverter.ConvertFromString("#00000000")) continue;  //Si no tiene color siguiente
-                if (paisEntry.Value.jugadorId == 0)continue;
-                
+                if (paisEntry.Value.jugadorId == 0) continue;
+
                 Color colorOriginal = paisEntry.Key;
                 Pais pais = paisEntry.Value;
 
@@ -170,10 +182,50 @@ namespace RiskWPF
 
                 OverlayCanvas.Children.Add(img);
             }
+            PonerEjercito();
+        }
+
+        private void PonerEjercito()
+        {
+            foreach (var paisEntry in colorAPais)
+            {
+                var colorPais = paisEntry.Key;
+                var pais = paisEntry.Value;
+
+                if (pais.jugadorId == 0) continue;
+
+                Point centro = Utils.CalcularCentroidePaisMask(colorPais, mapaColoresWB);
+                if (centro.X < 0) continue; // saltar si no existe
+
+                double x = centro.X * (MapaVisible.ActualWidth / mapaColoresWB.PixelWidth);
+                double y = centro.Y * (MapaVisible.ActualHeight / mapaColoresWB.PixelHeight);
+
+                Border marcador = new Border
+                {
+                    CornerRadius = new CornerRadius(9),
+                    Background = new SolidColorBrush(Color.FromArgb(180, 255, 255, 224)),
+                    BorderBrush = Brushes.Gray,
+                    BorderThickness = new Thickness(1),
+                    Child = new TextBlock
+                    {
+                        Text = pais.Tropas.ToString(),
+                        FontWeight = FontWeights.Bold,
+                        FontSize = 17,
+                        Foreground = Brushes.Black,
+                        TextAlignment = TextAlignment.Center,
+                        Padding = new Thickness(6, 0, 6, 0)
+                    }
+                };
+                Canvas.SetLeft(marcador, x - 15);
+                Canvas.SetTop(marcador, y - 15);
+                OverlayCanvas.Children.Add(marcador);
+            }
         }
 
         private void MapaVisible_MouseMove(object sender, MouseEventArgs e)
         {
+            //if (TurnWaitOverlay.Visibility == Visibility.Visible)
+            //    return;
             Point pos = e.GetPosition(MapaVisible);
 
             int x = (int)(pos.X * mapaColoresWB.PixelWidth / MapaVisible.ActualWidth);
@@ -196,6 +248,7 @@ namespace RiskWPF
                 paisResaltado = null;
                 OverlayCanvasHover.Children.Clear();
             }
+
         }
         private void ResaltarPais(Color colorPais)
         {
