@@ -73,7 +73,7 @@ namespace Datos
         {
             string json = JsonConvert.SerializeObject(message);
 
-            json = "{\"request\":\"" + consulta + "\"," + json.Substring(1);
+            json = "{\"request\":\"" + consulta + "\"," + "\"token\":\"" + Utils.user.Token +"\","+json.Substring(1);
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -83,7 +83,7 @@ namespace Datos
         {
             string json = JsonConvert.SerializeObject(message);
 
-            json = "{\"request\":\"" + consulta + "\",\"sala\":{" + json.Substring(1)+"}";
+            json = "{\"request\":\"" + consulta + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"sala\":{" + json.Substring(1)+"}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -94,7 +94,7 @@ namespace Datos
         {
             string usuarioJson = JsonConvert.SerializeObject(user);
 
-            string json = "{\"request\":\"" + Constants.RQ.CrearSala + "\",\"name\":\"" + nombreSala + "\",\"user\":" + usuarioJson + "}";
+            string json = "{\"request\":\"" + Constants.RQ.CrearSala + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"name\":\"" + nombreSala + "\",\"user\":" + usuarioJson + "}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -105,7 +105,7 @@ namespace Datos
         {
             string json;
 
-            json = "{\"request\":\"" + consulta + "\",\"user\":" + userid+"}";
+            json = "{\"request\":\"" + consulta + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"user\":" + userid+"}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -115,7 +115,7 @@ namespace Datos
         public static async Task<string> ReceiveMessage()
         {
             Debug.WriteLine("Recibiendo mensaje...");
-            byte[] buffer = new byte[2024]; 
+            byte[] buffer = new byte[50000]; 
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
 
             using (var cts = new CancellationTokenSource(Timeout))
@@ -148,11 +148,11 @@ namespace Datos
         {
             string json;
             if (join){
-                json = "{\"request\":\"" + Constants.RQ.JoinSala + "\",\"user\":" + id + ",\"sala\":" + salaId + "}";
+                json = "{\"request\":\"" + Constants.RQ.JoinSala + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"user\":" + id + ",\"sala\":" + salaId + "}";
             }
             else
             {
-                json = "{\"request\":\"" + Constants.RQ.SalirSala + "\",\"idUsuari\":" + id + ",\"idSala\":" + salaId + "}";
+                json = "{\"request\":\"" + Constants.RQ.SalirSala + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"idUsuari\":" + id + ",\"idSala\":" + salaId + "}";
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);

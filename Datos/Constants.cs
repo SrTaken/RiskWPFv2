@@ -12,11 +12,10 @@ namespace Datos
 
         public class RS
         {
-
             public const string ListaSalas = "getSalasRS";
             public const string JoinSala = "joinSalaRS";
             public const string ActualizarSala = "updateUserBC";
-            public const string EmpezarPartida = "empezar";
+            public const string EmpezarPartida = "empezarBC";
             public const string SalirSala = "leaveSalaRS";
             public const string CrearSala = "createSalaRS";
         }

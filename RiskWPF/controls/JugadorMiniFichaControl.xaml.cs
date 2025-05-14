@@ -27,15 +27,15 @@ namespace RiskWPF.controls
             InitializeComponent();
         }
 
-        public Jugador MyJugador
+        public JugadorJuego MyJugador
         {
-            get { return (Jugador)GetValue(MyJugadorProperty); }
+            get { return (JugadorJuego)GetValue(MyJugadorProperty); }
             set { SetValue(MyJugadorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for MyJugador.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty MyJugadorProperty =
-            DependencyProperty.Register("MyJugador", typeof(Jugador), typeof(JugadorMiniFichaControl), new PropertyMetadata(StaticOnJugadorChanged));
+            DependencyProperty.Register("MyJugador", typeof(JugadorJuego), typeof(JugadorMiniFichaControl), new PropertyMetadata(StaticOnJugadorChanged));
 
         private static void StaticOnJugadorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {

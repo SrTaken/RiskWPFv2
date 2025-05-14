@@ -57,6 +57,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+
             
             <StackPanel Orientation="Horizontal"
             HorizontalAlignment="Center"
@@ -64,7 +65,8 @@
             Margin="0,0,0,22"
             Panel.ZIndex="10"
             >
-    <!-- Refuerzo -->
+                <TextBox Text="1" Width="50" Height="50" FontSize="20" x:Name="txtTropasPaDentro" VerticalAlignment="Top"/>
+                <!-- Refuerzo -->
     <Border x:Name="BordeFaseRefuerzo"
             Margin="10"
             Padding="13,9"
@@ -107,6 +109,10 @@
                    Foreground="#358E26"/>
                 </Border>
             </StackPanel>
+
+            
+
+            <!-- Pantalla de espera -->
             <Border x:Name="TurnWaitOverlay"
             Background="#AA000000"
             Visibility="Collapsed"

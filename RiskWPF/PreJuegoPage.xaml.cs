@@ -114,7 +114,7 @@ namespace RiskWPF
 
             if (listo == Utils.sala.Jugadores.Count)
             {
-                Utils.partida.jugadorList = Utils.sala.Jugadores; //Temporal
+                //Utils.partida.jugadorList = Utils.sala.Jugadores; //Temporal
                 IniciarJuego();
             }
             

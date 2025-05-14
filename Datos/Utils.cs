@@ -16,7 +16,7 @@ namespace Datos
     public class Utils
     {
         public static User user;
-        public static bool demo = false;
+        public static bool demo = true;
         public static Partida partida = new(); 
         public static Sala sala = new();
 
@@ -67,7 +67,9 @@ namespace Datos
             if (userToken == null)
                 return null; 
 
-            return userToken.ToObject<User>();
+            User u =  userToken.ToObject<User>();
+            u.Token = jo["token"]?.ToString();
+            return u;
         }
 
         public static Point CalcularCentroidePaisMask(Color colorPais, WriteableBitmap mapa)

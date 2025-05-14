@@ -1,33 +1,28 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace Model
 {
     public class Pais
     {
-        public string nombre;
-        [JsonIgnore]
-        public Color color1;
-        public int jugadorId;
-        public int CentroX;
-        public int CentroY;
-        public int Tropas;
+        private int id;
+        private string nombre;
 
-        public Pais(string nombre)
+        [JsonProperty("id")]
+        public int Id
         {
-            this.nombre = nombre;
+            get { return id; }
+            set { id = value; }
         }
-
-        public Pais(string nombre, Color color1)
+        [JsonProperty("nombre")]
+        public string Nombre
         {
-            this.nombre = nombre;
-            this.color1 = color1;
+            get { return nombre; }
+            set { nombre = value; }
         }
-
     }
 }
