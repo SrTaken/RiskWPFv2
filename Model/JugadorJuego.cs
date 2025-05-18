@@ -14,7 +14,8 @@ namespace Model
         private string color;
         private int totalTropas;
         private int tropasTurno;
-        private Dictionary<Pais, int> paisesControlados = new(); //pais, tropas
+        private Dictionary<string, int> paisesControlados = new(); //pais, tropas
+        private string token;
 
         [JsonProperty("id")]
         public int Id
@@ -52,10 +53,17 @@ namespace Model
         }
 
         [JsonProperty("paisesControlados")]
-        public Dictionary<Pais, int> PaisesControlados
+        public Dictionary<string, int> PaisesControlados
         {
             get { return paisesControlados; }
             set { paisesControlados = value; }
+        }
+
+        [JsonProperty("token")]
+        public string Token
+        {
+            get { return token; }
+            set { token = value; }
         }
         public JugadorJuego()
         {

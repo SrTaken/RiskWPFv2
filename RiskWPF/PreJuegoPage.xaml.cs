@@ -25,7 +25,7 @@ namespace RiskWPF
     /// </summary>
     public partial class PreJuegoPage : Page
     {
-        private List<string> colores = new() { "Rojo", "Azul", "Verde", "Amarillo" };
+        private List<string> colores = new() { "VERMELL", "BLAU", "VERD", "GROC" };
 
         public PreJuegoPage()
         {
@@ -78,23 +78,28 @@ namespace RiskWPF
             else if (json.Contains("response") && JObject.Parse(json)?.Property("response")?.Value.ToString() == Constants.RS.ActualizarSala)
             {
                 var jugadoresArray = obj["jugadores"];
-                if (jugadoresArray != null)
+                var salaToken = obj["sala"];
+                var sala = salaToken.ToObject<Sala>();
+                if (sala != null)
                 {
                     Utils.sala.Jugadores.Clear();
-                    foreach (var jToken in jugadoresArray)
+                    foreach (var jToken in sala.Jugadores)
                     {
-                        var jugador = jToken.ToObject<Jugador>();
-                        Utils.sala.Jugadores.Add(jugador);
+                        Utils.sala.Jugadores.Add(jToken);
+                        if(jToken.UserId == Utils.user.Id)
+                        {
+                            Utils.jugadorID = jToken.Id;
+                        }
                     }
                     lbJugadores.ItemsSource = null;
                     lbJugadores.ItemsSource = Utils.sala.Jugadores;
                 }
             }
-            else if (action == Constants.RS.EmpezarPartida)
+            else if (json.Contains("partida"))
             {
                 //Conection.StopListening();
                 Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
-                IniciarJuego();
+                IniciarJuego(json);
             }
         }
 
@@ -115,13 +120,16 @@ namespace RiskWPF
             if (listo == Utils.sala.Jugadores.Count)
             {
                 //Utils.partida.jugadorList = Utils.sala.Jugadores; //Temporal
-                IniciarJuego();
+                IniciarJuego("");
             }
             
         }
 
-        private void IniciarJuego()
+        private void IniciarJuego(string json)
         {
+            JObject jo = JObject.Parse(json);
+            JToken userToken = jo["partida"];
+            Utils.partida = userToken.ToObject<Partida>();
             Window.GetWindow(this).Content = new JuegoPage();
         }
 

@@ -16,22 +16,22 @@ namespace Datos
     public class Utils
     {
         public static User user;
-        public static bool demo = true;
+        public static bool demo = false;
         public static Partida partida = new(); 
         public static Sala sala = new();
-
+        public static int jugadorID;
 
         public static Color GetColorFromName(string color)
         {
             switch (color)
             {
-                case "Rojo":
+                case "VERMELL":
                     return Colors.Red;
-                case "Azul":
+                case "BLAU":
                     return Colors.Blue;
-                case "Verde":
+                case "VERD":
                     return Colors.Green;
-                case "Amarillo":
+                case "GROC":
                     return Colors.Yellow;
                 default:
                     return Colors.Transparent;

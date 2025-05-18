@@ -16,6 +16,7 @@ namespace Model
         private int id;
         private int user_id;
         private string partida_id;
+        private string token;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -59,6 +60,12 @@ namespace Model
             set { partida_id = value; }
         }
 
+        [JsonProperty("token")]
+        public string Token
+        {
+            get { return token; }
+            set { token = value; }
+        }
         public Jugador(int user_id, string nombre, string color, bool estado)
         {
             this.user_id = id;

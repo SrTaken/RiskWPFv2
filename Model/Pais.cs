@@ -18,7 +18,7 @@ namespace Model
             get { return id; }
             set { id = value; }
         }
-        [JsonProperty("nombre")]
+        [JsonProperty("nom")]
         public string Nombre
         {
             get { return nombre; }

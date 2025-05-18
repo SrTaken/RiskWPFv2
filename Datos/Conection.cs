@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Datos
 {
@@ -154,6 +155,42 @@ namespace Datos
             {
                 json = "{\"request\":\"" + Constants.RQ.SalirSala + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"idUsuari\":" + id + ",\"idSala\":" + salaId + "}";
             }
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
+
+        public async static Task SendSeleccion(string token, string nombre)
+        {
+            string json;
+            string request = "seleccionarPaisRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"pais\":\"" + nombre + "\"}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
+
+        public static async Task EnviarRefuerzo(string token, string nombre, int tropasParaPoner, Estat fase)
+        {
+            string json;
+            string request = fase == Estat.REFORC_PAIS?"reforzarPaisRQ":"reforzarTropasRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\",\"nom\":\"" + nombre+ "\",\"tropas\":\"" + tropasParaPoner + "\"}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
+
+        public static async Task FinalizaTurno(string token)
+        {
+            string json;
+            string request = "saltarTurnoRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token  + "\"}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);

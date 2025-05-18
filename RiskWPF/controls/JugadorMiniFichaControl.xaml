@@ -15,6 +15,11 @@
                        FontFamily="Old English Text MT"
                        FontSize="19"
                        Foreground="#FFD700"/>
+            <TextBlock Text="{Binding totalTropas}"
+                       FontWeight="Bold"
+                       FontFamily="Old English Text MT"
+                       FontSize="19"
+                       Foreground="DarkSlateGray"/>
         </StackPanel>
     </Border>
 </UserControl>

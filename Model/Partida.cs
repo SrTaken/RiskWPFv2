@@ -10,9 +10,9 @@ namespace Model
 {
     public class Partida : INotifyPropertyChanged
     {
-        public List<JugadorJuego> jugadorList = new();
+        public List<JugadorJuego> jugadores = new();
         public int turno;
-        public string fase;
+        public Estat fase;
 
         public event PropertyChangedEventHandler? PropertyChanged;
     }

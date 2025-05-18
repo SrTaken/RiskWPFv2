@@ -28,6 +28,10 @@ namespace RiskWPF
         private WriteableBitmap mapaColoresWB;
         private PaisMapa paisResaltado = null;
 
+        private PaisMapa paisSeleccionado = null;
+        private PaisMapa paisAtaque = null;
+        private bool esMiTurno;
+
         private Dictionary<Color, PaisMapa> colorAPais = new Dictionary<Color, PaisMapa>
         {
             { (Color)ColorConverter.ConvertFromString("#FF0000"), new PaisMapa("Alaska") },
@@ -79,20 +83,29 @@ namespace RiskWPF
             InitializeComponent();
             var mapaColores = new BitmapImage(new Uri("pack://application:,,,/Assets/Risk_board_map.png"));
             mapaColoresWB = new WriteableBitmap(mapaColores);
-            Conection.OnMessageReceived += MensajeRecibidoWebSocket;
+            Conection.OnMessageReceived += MensajeRecibidoWebSocket; 
+            sliderTropasPaDentro.ValueChanged += SliderTropasPaDentro_ValueChanged;
             if (Utils.demo)
             {
                 Utils.partida.turno = Utils.user.Id;
-                lvJugadores.ItemsSource = Utils.partida.jugadorList;
+                lvJugadores.ItemsSource = Utils.partida.jugadores;
 
                 //Decir que fase estamos 
                 BordeFaseRefuerzo.Background = new SolidColorBrush(Colors.LightGoldenrodYellow);
                 BordeFaseAtacar.Background = (Brush)FindResource("FaseAtacar_BG");
                 BordeFaseReagrupar.Background = (Brush)FindResource("FaseAtacar_BG");
             }
+            //lvJugadores.ItemsSource = Utils.partida.jugadorList;
+            //ActualizarTurno();
+            //ActualizarEstado();
+            CargarPaises();
             ActualizarTurno();
             ActualizarEstado();
+            RepintarLienzo();
+
+            
         }
+
 
         private void MensajeRecibidoWebSocket(string json)
         {
@@ -104,26 +117,108 @@ namespace RiskWPF
 
         private void ProcesaMensajeDelServidor(string json)
         {
+            //return;   
             if (json == null)
             {
                 MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else if (JObject.Parse(json)?.Property("result")?.Value.ToString() == "Actualiza")
+            else if ("" == "Dados")
             {
-                //Cargar los nuevos datos
-                ///Tienes que recorrer el diccionario y poner a cada pais el value que pone el david
+                //logica de visibilidad de los dados
+            }
+            else
+            {
+                CargarPartida(json);
+                CargarPaises();
                 ActualizarTurno();
                 ActualizarEstado();
                 RepintarLienzo();
+
+                
             }
+            
         }
 
-
-        #region Eventos
-        private void MapaVisible_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        #region ActualizarPartida
+        private void CargarPartida(string json)
         {
-            //if (TurnWaitOverlay.Visibility == Visibility.Visible)
-            //    return;
+            JObject jo = JObject.Parse(json);
+            JToken userToken = jo["partida"];
+            Utils.partida = userToken.ToObject<Partida>();
+            lvJugadores.ItemsSource = Utils.partida.jugadores;
+        }
+        private void CargarPaises()
+        {
+            //// Limpiar primero todos los países del tablero
+            //foreach (var pais in colorAPais.Values)
+            //{
+            //    pais.jugadorId = 0;
+            //    pais.Tropas = 0;
+            //    pais.color1 = Colors.Gray;
+            //}
+
+            // Para cada jugador
+            foreach (var jugador in Utils.partida.jugadores)
+            {
+                // Para cada país controlado por este jugador
+                foreach (var kvp in jugador.PaisesControlados)
+                {
+                    string paisJugador = kvp.Key;
+                    int tropas = kvp.Value;
+
+                    // Busca el PaisMapa por nombre
+                    var paisMapa = colorAPais.Values.FirstOrDefault(p =>
+                        string.Equals(p.nombre, paisJugador, StringComparison.OrdinalIgnoreCase));
+                    if (paisMapa != null)
+                    {
+                        paisMapa.jugadorId = jugador.Id;
+                        paisMapa.Tropas = tropas;
+                        paisMapa.color1 = Utils.GetColorFromName(jugador.Color);
+                    }
+                }
+            }
+        }
+        public void ActualizarTurno()
+        {
+            esMiTurno = Utils.jugadorID == Utils.partida.turno;
+
+            TurnWaitOverlay.Visibility = esMiTurno ? Visibility.Collapsed : Visibility.Visible;
+            MapaVisible.IsEnabled = esMiTurno;
+            OverlayCanvas.IsEnabled = esMiTurno;
+            OverlayCanvasHover.IsEnabled = esMiTurno;
+            //btnFlecha.Visibility = !esMiTurno ? Visibility.Collapsed : Visibility.Visible;
+            //txtTropasPaDentro.Visibility = !esMiTurno ? Visibility.Collapsed : Visibility.Visible;
+
+            if(esMiTurno)
+            {
+                sliderTropasPaDentro.Maximum = Utils.partida.jugadores.FirstOrDefault(e => e.Id == Utils.jugadorID).TropasTurno;
+                if (sliderTropasPaDentro.Value > sliderTropasPaDentro.Maximum)
+                    sliderTropasPaDentro.Value = sliderTropasPaDentro.Maximum;
+            }
+
+            paisSeleccionado = null;
+            paisAtaque = null;
+            PintarSelecciones();
+        }
+        #endregion
+        #region Eventos
+        private void SliderTropasPaDentro_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (txtTropasSliderValor != null)
+                txtTropasSliderValor.Text = ((int)sliderTropasPaDentro.Value).ToString();
+        }
+        private async void btnFlecha_Click(object sender, RoutedEventArgs e)
+        {
+            if (esMiTurno)
+            {
+                await Conection.FinalizaTurno(Utils.user.Token);
+            }
+        }
+        private async void MapaVisible_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (TurnWaitOverlay.Visibility == Visibility.Visible)
+                return; 
 
             Point pos = e.GetPosition(MapaVisible);
 
@@ -134,19 +229,59 @@ namespace RiskWPF
             mapaColoresWB.CopyPixels(new Int32Rect(x, y, 1, 1), pixel, 4, 0);
             Color color = Color.FromArgb(255, pixel[2], pixel[1], pixel[0]); // BGRA a RGBA
 
-            // Busca el pais
-            if (colorAPais.TryGetValue(color, out PaisMapa pais))
+            if (colorAPais.TryGetValue(color, out PaisMapa paisClic))
             {
-                if (pais.jugadorId != Utils.partida.turno)
+                if (Utils.partida.fase == Estat.REFORC_PAIS || Utils.partida.fase == Estat.REFORC_TROPES)
                 {
-                    PintarPaisEnColor(color, Utils.GetColorFromName(Utils.partida.jugadorList.FirstOrDefault(e => e.Id == Utils.partida.turno).Color));
-                    //pais.color1 = Utils.GetColorFromName(Utils.partida.jugadorList.FirstOrDefault(e => e.Id == Utils.partida.turno).Color);
-                    pais.jugadorId = Utils.partida.turno;
-                    //RepintarLienzo();
+                    if (paisClic.jugadorId == Utils.jugadorID)
+                    {
+                        paisSeleccionado = paisClic;
+                        paisAtaque = null;
+                        PintarSelecciones();
+
+                        int tropasParaPoner = (int)sliderTropasPaDentro.Value;
+                        if (tropasParaPoner > 0)
+                        {
+                            await Conection.EnviarRefuerzo(Utils.user.Token, paisSeleccionado.nombre, tropasParaPoner, Utils.partida.fase);
+
+                        }
+                    }
+                }
+                else if (Utils.partida.fase == Estat.COL_LOCAR_INICIAL)
+                {
+                    if (paisClic.jugadorId != 0)
+                        return; 
+
+                    paisSeleccionado = paisClic; 
+                    paisAtaque = null;
+                    PintarSelecciones();
+                    await Conection.SendSeleccion(Utils.user.Token, paisSeleccionado.nombre);
+                }
+                else if (paisSeleccionado == null)
+                {
+                    if (paisClic.jugadorId == Utils.jugadorID)
+                    {
+                        paisSeleccionado = paisClic;
+                        paisAtaque = null;
+                        PintarSelecciones();
+                    }
+                }
+                else if (paisSeleccionado != null && Utils.partida.fase == Estat.COMBAT)
+                {
+                    if (paisClic != paisSeleccionado && paisClic.jugadorId != Utils.user.Id)
+                    {
+                        paisAtaque = paisClic;
+                        PintarSelecciones();
+                    }
+                }
+                else if (paisClic == paisSeleccionado)
+                {
+                    paisSeleccionado = null;
+                    paisAtaque = null;
+                    PintarSelecciones();
                 }
             }
         }
-
         private void MapaVisible_MouseMove(object sender, MouseEventArgs e)
         {
             //if (TurnWaitOverlay.Visibility == Visibility.Visible)
@@ -175,6 +310,8 @@ namespace RiskWPF
             }
 
         }
+        #endregion
+        #region ActualizarPantallaPorEvento
         private void ResaltarPais(Color colorPais)
         {
             OverlayCanvasHover.Children.Clear();
@@ -225,7 +362,6 @@ namespace RiskWPF
         {
             //OverlayCanvas.Children.Clear();
 
-            // Crea una imagen de la máscara del país que va a ser pintado
             var mask = new WriteableBitmap(mapaColoresWB.PixelWidth, mapaColoresWB.PixelHeight, 96, 96, PixelFormats.Bgra32, null);
             int stride = mapaColoresWB.BackBufferStride;
             byte[] pixels = new byte[mapaColoresWB.PixelHeight * stride];
@@ -268,37 +404,76 @@ namespace RiskWPF
             OverlayCanvas.Children.Add(img);
             
         }
+        private void PintarSelecciones()
+        {
+            CanvasSelecciones.Children.Clear();
+
+            if (paisSeleccionado != null)
+                PintarResaltePais(paisSeleccionado, Colors.LimeGreen, 255);
+            if (paisAtaque != null)
+                PintarResaltePais(paisAtaque, Colors.MediumVioletRed, 255);
+        }
+        private void PintarResaltePais(PaisMapa pais, Color colorResalte, byte alpha = 120)
+        {
+            var colorPais = colorAPais.FirstOrDefault(kvp => kvp.Value == pais).Key;
+            var mask = new WriteableBitmap(mapaColoresWB.PixelWidth, mapaColoresWB.PixelHeight, 96, 96, PixelFormats.Bgra32, null);
+            int stride = mapaColoresWB.BackBufferStride;
+            byte[] pixels = new byte[mapaColoresWB.PixelHeight * stride];
+            mapaColoresWB.CopyPixels(pixels, stride, 0);
+
+            byte[] maskPixels = new byte[pixels.Length];
+
+            for (int i = 0; i < pixels.Length; i += 4)
+            {
+                byte b = pixels[i];
+                byte g = pixels[i + 1];
+                byte r = pixels[i + 2];
+
+                if (r == colorPais.R && g == colorPais.G && b == colorPais.B)
+                {
+                    maskPixels[i] = colorResalte.B;
+                    maskPixels[i + 1] = colorResalte.G;
+                    maskPixels[i + 2] = colorResalte.R;
+                    maskPixels[i + 3] = alpha;
+                }
+                else
+                {
+                    maskPixels[i + 3] = 0;
+                }
+            }
+
+            mask.WritePixels(new Int32Rect(0, 0, mask.PixelWidth, mask.PixelHeight), maskPixels, stride, 0);
+
+            var img = new System.Windows.Controls.Image
+            {
+                Source = mask,
+                Width = MapaVisible.ActualWidth,
+                Height = MapaVisible.ActualHeight,
+                Stretch = Stretch.Fill
+            };
+            CanvasSelecciones.Width = MapaVisible.ActualWidth;
+            CanvasSelecciones.Height = MapaVisible.ActualHeight;
+            CanvasSelecciones.Children.Add(img);
+        }
         #endregion
-        #region ActualizarPantalla
+        #region ActualizarPantallaTurnos
         private void ActualizarEstado()
         {
-            BordeFaseRefuerzo.Background = Utils.partida.fase == "Refuerzo" ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("BordeFaseRefuerzo");
-            BordeFaseAtacar.Background = Utils.partida.fase == "Ataque" ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("BordeFaseAtacar");
-            BordeFaseReagrupar.Background = Utils.partida.fase == "Reagrupar" ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("BordeFaseReagrupar");
-        }
-        public void ActualizarTurno()
-        {
-            bool esMiTurno = Utils.user.Id == Utils.partida.turno;
-
-            TurnWaitOverlay.Visibility = esMiTurno ? Visibility.Collapsed : Visibility.Visible;
-            MapaVisible.IsEnabled = esMiTurno;
-            OverlayCanvas.IsEnabled = esMiTurno;
-            OverlayCanvasHover.IsEnabled = esMiTurno;
+            BordeFaseRefuerzo.Background = Utils.partida.fase == Estat.REFORC_TROPES ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseRefuerzo_BG");
+            BordeFaseAtacar.Background = Utils.partida.fase == Estat.COMBAT ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseAtacar_BG");
+            BordeFaseReagrupar.Background = Utils.partida.fase == Estat.RECOL_LOCACIO ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseReagrupar_BG");
         }
         private void RepintarLienzo()
         {
             OverlayCanvas.Children.Clear();
 
-            // Recorre todos los países y repinta usando su color actual
             foreach (var paisEntry in colorAPais)
             {
-                //if(paisEntry.Value.color1 == (Color)ColorConverter.ConvertFromString("#00000000")) continue;  //Si no tiene color siguiente
                 if (paisEntry.Value.jugadorId == 0) continue;
 
                 Color colorOriginal = paisEntry.Key;
                 PaisMapa pais = paisEntry.Value;
 
-                // Si el país se ha pintado antes, usar el color pintado; si no, usa el color original.
                 Color colorUsar = pais.color1;
 
                 var mask = new WriteableBitmap(mapaColoresWB.PixelWidth, mapaColoresWB.PixelHeight, 96, 96, PixelFormats.Bgra32, null);
@@ -338,6 +513,8 @@ namespace RiskWPF
                     Stretch = Stretch.Fill
                 };
 
+                OverlayCanvas.Width = MapaVisible.ActualWidth;
+                OverlayCanvas.Height = MapaVisible.ActualHeight;
                 OverlayCanvas.Children.Add(img);
             }
             PonerEjercito();
@@ -379,5 +556,7 @@ namespace RiskWPF
             }
         }
         #endregion
+
+        
     }
 }
