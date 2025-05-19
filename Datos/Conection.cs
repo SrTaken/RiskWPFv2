@@ -176,7 +176,7 @@ namespace Datos
         public static async Task EnviarRefuerzo(string token, string nombre, int tropasParaPoner, Estat fase)
         {
             string json;
-            string request = fase == Estat.REFORC_PAIS?"reforzarPaisRQ":"reforzarTropasRQ";
+            string request = fase == Estat.REFORC_PAIS?"reforzarPaisRQ":"reforzarTurnoRQ";
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\",\"nom\":\"" + nombre+ "\",\"tropas\":\"" + tropasParaPoner + "\"}";
 
@@ -191,6 +191,30 @@ namespace Datos
             string request = "saltarTurnoRQ";
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token  + "\"}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
+
+        public static async Task AtacarMensaje(string token, string nombre1, string nombre2, int numDadosAtacar)
+        {
+            string json;
+            string request = "atacarRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisAtacante\":\"" + nombre1 + "\"," + "\"paisDefensor\":\"" + nombre2 + "\"," + "\"numTropas\":" + numDadosAtacar + "}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
+
+        public static async Task DefenderMensaje(string token, string paisDefensaActual, int dados, string paisAtacante, int numDadosAtaque)
+        {
+            string json;
+            string request = "meAtacanRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisAtacante\":\"" + paisAtacante + "\"," + "\"paisDefensor\":\"" + paisDefensaActual + "\"," + "\"numTropasDefensa\":" + dados + "," + "\"numTropasAtaque\":" + numDadosAtaque+ "}";
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);

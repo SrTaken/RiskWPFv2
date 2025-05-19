@@ -31,6 +31,12 @@ namespace RiskWPF
         private PaisMapa paisSeleccionado = null;
         private PaisMapa paisAtaque = null;
         private bool esMiTurno;
+        private int numDadosAtacar = 1;
+        private int dadosDefensaMaximos = 1; 
+        private string paisDefensaActual = "";
+        string paisAtacante;
+        string paisDefensor;
+        int numDadosAtaque;
 
         private Dictionary<Color, PaisMapa> colorAPais = new Dictionary<Color, PaisMapa>
         {
@@ -123,9 +129,27 @@ namespace RiskWPF
                 MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            else if ("" == "Dados")
+
+            var obj = JObject.Parse(json);
+            var action = obj["response"]?.ToString();
+
+            if (action == "resultadoAtaqueRS")
             {
                 //logica de visibilidad de los dados
+            }
+            else if(action == "teAtacanRS")
+            {
+                paisAtacante = obj["paisAtacante"]?.ToString();
+                paisDefensor = obj["paisDefensor"]?.ToString();
+                numDadosAtaque = obj["numTropasAtaque"]?.ToObject<int>() ?? 1;
+                int tropasDefensor = 1;
+
+                var miJugador = Utils.partida.jugadores.FirstOrDefault(j => j.Id == Utils.jugadorID);
+                if (miJugador != null && miJugador.PaisesControlados.ContainsKey(paisDefensor))
+                    tropasDefensor = miJugador.PaisesControlados[paisDefensor];
+
+
+                MostrarDefensa(paisDefensor, tropasDefensor, numDadosAtaque, paisAtacante);
             }
             else
             {
@@ -150,24 +174,13 @@ namespace RiskWPF
         }
         private void CargarPaises()
         {
-            //// Limpiar primero todos los países del tablero
-            //foreach (var pais in colorAPais.Values)
-            //{
-            //    pais.jugadorId = 0;
-            //    pais.Tropas = 0;
-            //    pais.color1 = Colors.Gray;
-            //}
-
-            // Para cada jugador
             foreach (var jugador in Utils.partida.jugadores)
             {
-                // Para cada país controlado por este jugador
                 foreach (var kvp in jugador.PaisesControlados)
                 {
                     string paisJugador = kvp.Key;
                     int tropas = kvp.Value;
 
-                    // Busca el PaisMapa por nombre
                     var paisMapa = colorAPais.Values.FirstOrDefault(p =>
                         string.Equals(p.nombre, paisJugador, StringComparison.OrdinalIgnoreCase));
                     if (paisMapa != null)
@@ -187,10 +200,11 @@ namespace RiskWPF
             MapaVisible.IsEnabled = esMiTurno;
             OverlayCanvas.IsEnabled = esMiTurno;
             OverlayCanvasHover.IsEnabled = esMiTurno;
-            //btnFlecha.Visibility = !esMiTurno ? Visibility.Collapsed : Visibility.Visible;
-            //txtTropasPaDentro.Visibility = !esMiTurno ? Visibility.Collapsed : Visibility.Visible;
 
-            if(esMiTurno)
+            stackPNumTropas.Visibility = esMiTurno  ? Visibility.Visible : Visibility.Collapsed;
+            btnFlecha.Visibility = esMiTurno ? Visibility.Visible: Visibility.Collapsed;
+
+            if (esMiTurno)
             {
                 sliderTropasPaDentro.Maximum = Utils.partida.jugadores.FirstOrDefault(e => e.Id == Utils.jugadorID).TropasTurno;
                 if (sliderTropasPaDentro.Value > sliderTropasPaDentro.Maximum)
@@ -203,6 +217,32 @@ namespace RiskWPF
         }
         #endregion
         #region Eventos
+        private async void btnDefender1_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag.ToString(), out int dados) && dados >= 1 && dados <= dadosDefensaMaximos)
+            {
+                await Conection.DefenderMensaje(Utils.user.Token, paisDefensaActual, dados, paisAtacante, numDadosAtaque);
+                OcultarDefensa();
+            }
+        }
+        private void btnDado1_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag.ToString(), out int dados))
+            {
+                numDadosAtacar = dados;
+                ActualizarPanelAtaque();
+            }
+        }
+        private async void btnAtacar_Click(object sender, RoutedEventArgs e)
+        {
+            if (paisSeleccionado != null && paisAtaque != null && numDadosAtacar >= 1)
+            {
+                await Conection.AtacarMensaje(Utils.user.Token, paisSeleccionado.nombre, paisAtaque.nombre, numDadosAtacar);
+                paisSeleccionado = null;
+                paisAtaque = null;
+                PintarSelecciones();
+            }
+        }
         private void SliderTropasPaDentro_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (txtTropasSliderValor != null)
@@ -316,7 +356,6 @@ namespace RiskWPF
         {
             OverlayCanvasHover.Children.Clear();
 
-            // Crea una imagen de la máscara del país resaltado
             var mask = new WriteableBitmap(mapaColoresWB.PixelWidth, mapaColoresWB.PixelHeight, 96, 96, PixelFormats.Bgra32, null);
             int stride = mapaColoresWB.BackBufferStride;
             byte[] pixels = new byte[mapaColoresWB.PixelHeight * stride];
@@ -360,8 +399,6 @@ namespace RiskWPF
         }
         private void PintarPaisEnColor(Color colorPaisOriginal, Color colorNuevo)
         {
-            //OverlayCanvas.Children.Clear();
-
             var mask = new WriteableBitmap(mapaColoresWB.PixelWidth, mapaColoresWB.PixelHeight, 96, 96, PixelFormats.Bgra32, null);
             int stride = mapaColoresWB.BackBufferStride;
             byte[] pixels = new byte[mapaColoresWB.PixelHeight * stride];
@@ -412,6 +449,60 @@ namespace RiskWPF
                 PintarResaltePais(paisSeleccionado, Colors.LimeGreen, 255);
             if (paisAtaque != null)
                 PintarResaltePais(paisAtaque, Colors.MediumVioletRed, 255);
+
+            ActualizarPanelAtaque();
+        }
+        private void ActualizarPanelAtaque()
+        {
+            bool mostrarAtaque = Utils.partida.fase == Estat.COMBAT && paisSeleccionado != null && paisAtaque != null && esMiTurno;
+            panelAtaque.Visibility = mostrarAtaque ? Visibility.Visible : Visibility.Collapsed;
+
+            if (mostrarAtaque)
+            {
+                // Calcular el máximo de dados (nunca dejar el país vacío)
+                int tropasAtt = paisSeleccionado.Tropas;
+                int maxDados = Math.Min(3, tropasAtt - 1);
+                if (maxDados < 1)
+                {
+                    // Si no puedo atacar (solo 1 tropa), oculto el panel de ataque completamente
+                    panelAtaque.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                // Habilitar sólo los botones válidos para ese número de dados
+                btnDado1.IsEnabled = maxDados >= 1;
+                btnDado2.IsEnabled = maxDados >= 2;
+                btnDado3.IsEnabled = maxDados >= 3;
+
+                // Por si el numDadosAtacar está fuera del rango posible, lo ajusto:
+                if (numDadosAtacar > maxDados)
+                    numDadosAtacar = maxDados;
+                if (numDadosAtacar < 1)
+                    numDadosAtacar = 1;
+
+                btnDado1.Background = numDadosAtacar == 1 ? Brushes.LightGreen : Brushes.LightGray;
+                btnDado2.Background = numDadosAtacar == 2 ? Brushes.LightGreen : Brushes.LightGray;
+                btnDado3.Background = numDadosAtacar == 3 ? Brushes.LightGreen : Brushes.LightGray;
+            }
+        }
+        public void MostrarDefensa(string paisDefensor, int tropasDefensor, int dadosAtacante, string paisAtacante)
+        {
+            paisDefensaActual = paisDefensor;
+            DefensaOverlay.Visibility = Visibility.Visible;
+
+            dadosDefensaMaximos = tropasDefensor >= 2 ? 2 : 1;
+            txtDefensaPais.Text = $"¡Estás bajo ataque!\n\n"
+                                + $"{paisAtacante} ataca a {paisDefensor} ({tropasDefensor} tropas).\n"
+                                + $"El atacante lanza {dadosAtacante} dado(s).\n\n"
+                                + $"¿Con cuántos dados quieres defender?";
+
+            btnDefender1.IsEnabled = true;
+            btnDefender2.IsEnabled = dadosDefensaMaximos == 2;
+        }
+        public void OcultarDefensa()
+        {
+            DefensaOverlay.Visibility = Visibility.Collapsed;
+            paisDefensaActual = "";
         }
         private void PintarResaltePais(PaisMapa pais, Color colorResalte, byte alpha = 120)
         {
@@ -462,6 +553,10 @@ namespace RiskWPF
             BordeFaseRefuerzo.Background = Utils.partida.fase == Estat.REFORC_TROPES ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseRefuerzo_BG");
             BordeFaseAtacar.Background = Utils.partida.fase == Estat.COMBAT ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseAtacar_BG");
             BordeFaseReagrupar.Background = Utils.partida.fase == Estat.RECOL_LOCACIO ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseReagrupar_BG");
+
+            stackPNumTropas.Visibility = Utils.partida.fase == Estat.REFORC_PAIS || Utils.partida.fase == Estat.REFORC_TROPES?Visibility.Visible:Visibility.Collapsed;
+            btnFlecha.Visibility = Utils.partida.fase == Estat.COL_LOCAR_INICIAL ? Visibility.Collapsed : Visibility.Visible;
+
         }
         private void RepintarLienzo()
         {
@@ -557,6 +652,5 @@ namespace RiskWPF
         }
         #endregion
 
-        
     }
 }

@@ -66,24 +66,42 @@
             Margin="0,0,0,22"
             Panel.ZIndex="10"
             >
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,8,0">
-    <Slider x:Name="sliderTropasPaDentro"
-            Minimum="1"
-            Maximum="10"              
-            Value="1"
-            Width="70"
-            Height="30"
-            TickFrequency="1"
-            IsSnapToTickEnabled="True"
-            VerticalAlignment="Center"
-            />
-    <TextBlock x:Name="txtTropasSliderValor"
-               Text="1"
-               FontSize="18"
-               FontWeight="Bold"
-               TextAlignment="Center"
-               Width="70"/>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,8,0" x:Name="stackPNumTropas">
+            <Slider x:Name="sliderTropasPaDentro"
+                    Minimum="1"
+                    Maximum="10"              
+                    Value="1"
+                    Width="70"
+                    Height="30"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    VerticalAlignment="Center"
+                    />
+            <TextBlock x:Name="txtTropasSliderValor"
+                       Text="1"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       TextAlignment="Center"
+                       Width="70"/>
 </StackPanel>
+                
+                <StackPanel x:Name="panelAtaque" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed" Margin="0,0,0,0" >
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="btnDado1" Click="btnDado1_Click" Tag="1" Content="1" Width="36" Height="36" Margin="1"/>
+                        <Button x:Name="btnDado2" Click="btnDado1_Click" Tag="2" Content="2" Width="36" Height="36" Margin="1"/>
+                        <Button x:Name="btnDado3" Click="btnDado1_Click" Tag="3" Content="3" Width="36" Height="36" Margin="1"/>
+                    </StackPanel>
+
+                    <Button x:Name="btnAtacar"
+            Content="Atacar"
+            Width="80"
+            Height="36"
+            FontWeight="Bold"
+            Margin="10,0,0,0"
+            Click="btnAtacar_Click"
+            />
+                </StackPanel>
                 <Button Content="→"
             x:Name="btnFlecha"
             Width="60"
@@ -153,6 +171,29 @@
                    FontWeight="Bold"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
+            </Border>
+
+            <Border x:Name="DefensaOverlay"
+        Background="#CC222222"
+        Visibility="Collapsed"
+        IsHitTestVisible="True"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Panel.ZIndex="200">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="#FFFCE8B4">
+                    <TextBlock Text="¡Estás bajo ataque!"
+                   FontWeight="Bold" FontSize="28"
+                   Foreground="#B22222"
+                   HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    <TextBlock x:Name="txtDefensaPais"
+                   Text="Elige cuántos dados usar para defender:"
+                   FontSize="16"
+                   HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="btnDefender1" Content="1" Width="48" Height="48" Margin="8" Click="btnDefender1_Click" Tag="1"/>
+                        <Button x:Name="btnDefender2" Content="2" Width="48" Height="48" Margin="8" Click="btnDefender1_Click" Tag="2"/>
+                    </StackPanel>
+                </StackPanel>
             </Border>
         </Grid>
     </Grid>

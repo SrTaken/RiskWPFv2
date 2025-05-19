@@ -15,7 +15,7 @@
                        FontFamily="Old English Text MT"
                        FontSize="19"
                        Foreground="#FFD700"/>
-            <TextBlock Text="{Binding totalTropas}"
+            <TextBlock Text="{Binding TotalTropas}"
                        FontWeight="Bold"
                        FontFamily="Old English Text MT"
                        FontSize="19"
