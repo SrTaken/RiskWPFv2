@@ -31,7 +31,7 @@ namespace RiskWPF
         {
             InitializeComponent();
 
-            cboColor.ItemsSource = colores;
+            //cboColor.ItemsSource = colores;
             
 
             if (Utils.demo)
@@ -49,6 +49,8 @@ namespace RiskWPF
             }
             txtLobbyName.Text = Utils.sala.Nombre;
             lbJugadores.ItemsSource = Utils.sala.Jugadores;
+
+            ActualizaColoresDisponibles();
 
         }
 
@@ -93,6 +95,7 @@ namespace RiskWPF
                     }
                     lbJugadores.ItemsSource = null;
                     lbJugadores.ItemsSource = Utils.sala.Jugadores;
+                    ActualizaColoresDisponibles();
                 }
             }
             else if (json.Contains("partida"))
@@ -186,7 +189,27 @@ namespace RiskWPF
             {
                 await Conection.SendMessageUpdateSala(Utils.sala, Constants.RQ.ActualizarSala);
             }
-            // Mandar mensaje que he cambiado
+        }
+
+        private void ActualizaColoresDisponibles()
+        {
+            var usados = Utils.sala.Jugadores
+                          .Where(j => !string.IsNullOrEmpty(j.Color))
+                          .Select(j => j.Color)
+                          .ToHashSet();
+
+            var miJugador = Utils.sala.Jugadores.FirstOrDefault(e => e.UserId == Utils.user.Id);
+            string miColor = miJugador?.Color;
+            var disponibles = colores
+                .Where(c => !usados.Contains(c) || c == miColor)
+                .ToList();
+
+            cboColor.ItemsSource = disponibles;
+
+            if (!string.IsNullOrEmpty(miColor))
+            {
+                cboColor.SelectedItem = miColor;
+            }
         }
     }
 }

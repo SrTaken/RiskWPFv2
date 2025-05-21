@@ -220,5 +220,29 @@ namespace Datos
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
             await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
         }
+
+        public static async Task MoverTropasConquista(string token, string ultimoPaisAtacante, string ultimoPaisConquistado, int numDadosAtacar)
+        {
+            string json;
+            string request = "conquistaRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisOrigen\":\"" + ultimoPaisAtacante + "\"," + "\"paisDestino\":\"" + ultimoPaisConquistado + "\"," + "\"numTropas\":" + numDadosAtacar + "}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
+
+        public static async Task MoverTropasReagrupe(string token, string ultimoPaisAtacante, string ultimoPaisConquistado, int tropasAMover)
+        {
+            string json;
+            string request = "moverTropasRQ";
+
+            json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisOrigen\":\"" + ultimoPaisAtacante + "\"," + "\"paisDestino\":\"" + ultimoPaisConquistado + "\"," + "\"numTropas\":" + tropasAMover + "}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, new CancellationTokenSource(Timeout).Token);
+        }
     }
 }

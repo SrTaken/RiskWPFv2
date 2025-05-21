@@ -3,23 +3,30 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:RiskWPF" xmlns:controls="clr-namespace:RiskWPF.controls"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      xmlns:local="clr-namespace:RiskWPF"
+      xmlns:controls="clr-namespace:RiskWPF.controls"
+      mc:Ignorable="d"
+      d:DesignHeight="450"
+      d:DesignWidth="800"
       Title="JuegoPage">
+
     <Page.Resources>
         <SolidColorBrush x:Key="FaseRefuerzo_BG" Color="#FFFCE8B4"/>
         <SolidColorBrush x:Key="FaseAtacar_BG" Color="#FFFFCFC7"/>
         <SolidColorBrush x:Key="FaseReagrupar_BG" Color="#FFCBF5B1"/>
     </Page.Resources>
+
     <Grid Background="AntiqueWhite" x:Name="gridPrincipal">
-        <Image x:Name="MapaVisible" Source="Assets/Risk_board.png" MouseLeftButtonDown="MapaVisible_MouseLeftButtonDown" MouseMove="MapaVisible_MouseMove"/>
+        <Image x:Name="MapaVisible"
+            Source="Assets/Risk_board.png"
+            MouseLeftButtonDown="MapaVisible_MouseLeftButtonDown"
+            MouseMove="MapaVisible_MouseMove"/>
         <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False"/>
         <Canvas x:Name="OverlayCanvasHover" IsHitTestVisible="False"/>
         <Canvas x:Name="CanvasSelecciones" IsHitTestVisible="False"/>
-        
-        <!-- Dados -->
-        <Grid VerticalAlignment="Center" Visibility="Collapsed">
+
+        <!-- Dados principales ocultos -->
+        <!--<Grid VerticalAlignment="Center" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
@@ -30,28 +37,26 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
-            <controls:D6Control Width="150" Height="150" MyNumber="5" x:Name="DadoIzquierdo1" Grid.Row="1"/>
+
+            --><!--<controls:D6Control Width="150" Height="150" MyNumber="5" x:Name="DadoIzquierdo1" Grid.Row="1"/>
             <controls:D6Control Width="150" Height="150" MyNumber="2" x:Name="DadoIzquierdo2" Grid.Row="2"/>
             <controls:D6Control Width="150" Height="150" MyNumber="3" x:Name="DadoIzquierdo3" Grid.Row="3"/>
-
             <controls:D6Control Width="150" Height="150" MyNumber="4" x:Name="DadoDerecho1" Grid.Row="1" Grid.Column="1"/>
-            <controls:D6Control Width="150" Height="150" MyNumber="6" x:Name="DadoDerecho2" Grid.Row="2" Grid.Column="1"/>
-            <controls:D6Control Width="150" Height="150" MyNumber="1" x:Name="DadoDerecho3" Grid.Row="3" Grid.Column="1"/>
-        </Grid>
+            <controls:D6Control Width="150" Height="150" MyNumber="6" x:Name="DadoDerecho2" Grid.Row="2" Grid.Column="1"/>--><!--
+        </Grid>-->
 
-        <!-- Otros datos-->
+        <!-- UI principal -->
         <Grid>
-            <ListView x:Name="lvJugadores"
-                    Width="250"
-                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Margin="0,30,15,30"
-                    Background="Transparent"
-                    BorderBrush="Transparent"
-                    
-                    >
+            <!-- LISTA DE JUGADORES -->
+            <ListView
+                x:Name="lvJugadores"
+                Width="250"
+                ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0,30,15,30"
+                Background="Transparent"
+                BorderBrush="Transparent">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <controls:JugadorMiniFichaControl MyJugador="{Binding}"/>
@@ -59,140 +64,237 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            
-            <StackPanel Orientation="Horizontal"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            Margin="0,0,0,22"
-            Panel.ZIndex="10"
-            >
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,8,0" x:Name="stackPNumTropas">
-            <Slider x:Name="sliderTropasPaDentro"
-                    Minimum="1"
-                    Maximum="10"              
-                    Value="1"
-                    Width="70"
-                    Height="30"
-                    TickFrequency="1"
-                    IsSnapToTickEnabled="True"
-                    VerticalAlignment="Center"
-                    />
-            <TextBlock x:Name="txtTropasSliderValor"
-                       Text="1"
-                       FontSize="18"
-                       FontWeight="Bold"
-                       TextAlignment="Center"
-                       Width="70"/>
-</StackPanel>
-                
-                <StackPanel x:Name="panelAtaque" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed" Margin="0,0,0,0" >
+            <!-- CONTROLES INFERIORES -->
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,22"
+                Panel.ZIndex="10">
 
+                <!-- Slider de tropas de refuerzo -->
+                <StackPanel Orientation="Vertical"
+                    VerticalAlignment="Center"
+                    Margin="0,0,8,0"
+                    x:Name="stackPNumTropas">
+                    <Slider x:Name="sliderTropasPaDentro"
+                  Minimum="1"
+                  Maximum="10"
+                  Value="1"
+                  Width="70"
+                  Height="30"
+                  TickFrequency="1"
+                  IsSnapToTickEnabled="True"
+                  VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtTropasSliderValor"
+                     Text="1"
+                     FontSize="18"
+                     FontWeight="Bold"
+                     TextAlignment="Center"
+                     Width="70"/>
+                </StackPanel>
+
+                <!-- Panel de ataque (dados + botón atacar) -->
+                <StackPanel x:Name="panelAtaque"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed"
+                    Margin="0,0,0,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Button x:Name="btnDado1" Click="btnDado1_Click" Tag="1" Content="1" Width="36" Height="36" Margin="1"/>
                         <Button x:Name="btnDado2" Click="btnDado1_Click" Tag="2" Content="2" Width="36" Height="36" Margin="1"/>
                         <Button x:Name="btnDado3" Click="btnDado1_Click" Tag="3" Content="3" Width="36" Height="36" Margin="1"/>
                     </StackPanel>
-
                     <Button x:Name="btnAtacar"
-            Content="Atacar"
-            Width="80"
-            Height="36"
-            FontWeight="Bold"
-            Margin="10,0,0,0"
-            Click="btnAtacar_Click"
-            />
+                  Content="Atacar"
+                  Width="80"
+                  Height="36"
+                  FontWeight="Bold"
+                  Margin="10,0,0,0"
+                  Click="btnAtacar_Click"/>
                 </StackPanel>
+
+                <!-- Botón de pasar turno -->
                 <Button Content="→"
-            x:Name="btnFlecha"
-            Width="60"
-            Height="50"
-            FontSize="35"
-            FontWeight="Bold"
-            Margin="12,0,0,0"
-            Background="#38B"
-            BorderBrush="#246"
-            Click="btnFlecha_Click"/>
-                <!-- Refuerzo -->
-    <Border x:Name="BordeFaseRefuerzo"
-            Margin="10"
-            Padding="13,9"
-            CornerRadius="18"
-            BorderThickness="3"
-            BorderBrush="#D4AF37"
-            Background="{DynamicResource FaseRefuerzo_BG}">
-        <TextBlock Text="Refuerzo"
-                   FontFamily="Old English Text MT"
-                   FontSize="28"
-                   FontWeight="Bold"
-                   Foreground="#D4AF37"/>
-    </Border>
-    <!-- Atacar -->
-    <Border x:Name="BordeFaseAtacar"
-            Margin="10"
-            Padding="13,9"
-            CornerRadius="18"
-            BorderThickness="3"
-            BorderBrush="#CB3333"
-            Background="{DynamicResource FaseAtacar_BG}">
-        <TextBlock Text="Atacar"
-                   FontFamily="Old English Text MT"
-                   FontSize="28"
-                   FontWeight="Bold"
-                   Foreground="#CB3333"/>
-    </Border>
-    <!-- Reagrupar -->
-    <Border x:Name="BordeFaseReagrupar"
-            Margin="10"
-            Padding="13,9"
-            CornerRadius="18"
-            BorderThickness="3"
-            BorderBrush="#358E26"
-            Background="{DynamicResource FaseReagrupar_BG}">
-        <TextBlock Text="Reagrupar"
-                   FontFamily="Old English Text MT"
-                   FontSize="28"
-                   FontWeight="Bold"
-                   Foreground="#358E26"/>
+                x:Name="btnFlecha"
+                Width="60"
+                Height="50"
+                FontSize="35"
+                FontWeight="Bold"
+                Margin="12,0,0,0"
+                Background="#38B"
+                BorderBrush="#246"
+                Click="btnFlecha_Click"/>
+
+                <!-- Fases del juego -->
+                <Border x:Name="BordeFaseRefuerzo"
+                Margin="10"
+                Padding="13,9"
+                CornerRadius="18"
+                BorderThickness="3"
+                BorderBrush="#D4AF37"
+                Background="{DynamicResource FaseRefuerzo_BG}">
+                    <TextBlock Text="Refuerzo"
+                     FontFamily="Old English Text MT"
+                     FontSize="28"
+                     FontWeight="Bold"
+                     Foreground="#D4AF37"/>
+                </Border>
+                <Border x:Name="BordeFaseAtacar"
+                Margin="10"
+                Padding="13,9"
+                CornerRadius="18"
+                BorderThickness="3"
+                BorderBrush="#CB3333"
+                Background="{DynamicResource FaseAtacar_BG}">
+                    <TextBlock Text="Atacar"
+                     FontFamily="Old English Text MT"
+                     FontSize="28"
+                     FontWeight="Bold"
+                     Foreground="#CB3333"/>
+                </Border>
+                <Border x:Name="BordeFaseReagrupar"
+                Margin="10"
+                Padding="13,9"
+                CornerRadius="18"
+                BorderThickness="3"
+                BorderBrush="#358E26"
+                Background="{DynamicResource FaseReagrupar_BG}">
+                    <TextBlock Text="Reagrupar"
+                     FontFamily="Old English Text MT"
+                     FontSize="28"
+                     FontWeight="Bold"
+                     Foreground="#358E26"/>
                 </Border>
             </StackPanel>
 
-            
-
             <!-- Pantalla de espera -->
             <Border x:Name="TurnWaitOverlay"
-            Background="#AA000000"
-            Visibility="Collapsed"
-            IsHitTestVisible="True"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
-        <TextBlock Text="Espera tu turno..." 
+                Background="#AA000000"
+                Visibility="Collapsed"
+                IsHitTestVisible="True"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+                <TextBlock Text="Espera tu turno..."
                    Foreground="White"
                    FontSize="44"
                    FontWeight="Bold"
                    HorizontalAlignment="Center"
-                   VerticalAlignment="Center" />
+                   VerticalAlignment="Center"/>
             </Border>
-
+            <!-- Overlay de defensa -->
             <Border x:Name="DefensaOverlay"
-        Background="#CC222222"
-        Visibility="Collapsed"
-        IsHitTestVisible="True"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        Panel.ZIndex="200">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="#FFFCE8B4">
+              Background="#CC222222"
+              Visibility="Collapsed"
+              IsHitTestVisible="True"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              Panel.ZIndex="200">
+                <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Background="#FFFCE8B4">
                     <TextBlock Text="¡Estás bajo ataque!"
-                   FontWeight="Bold" FontSize="28"
-                   Foreground="#B22222"
-                   HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                     FontWeight="Bold"
+                     FontSize="28"
+                     Foreground="#B22222"
+                     HorizontalAlignment="Center"
+                     Margin="0,0,0,20"/>
                     <TextBlock x:Name="txtDefensaPais"
-                   Text="Elige cuántos dados usar para defender:"
-                   FontSize="16"
-                   HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                     Text="Elige cuántos dados usar para defender:"
+                     FontSize="16"
+                     HorizontalAlignment="Center"
+                     Margin="0,0,0,12"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="btnDefender1" Content="1" Width="48" Height="48" Margin="8" Click="btnDefender1_Click" Tag="1"/>
                         <Button x:Name="btnDefender2" Content="2" Width="48" Height="48" Margin="8" Click="btnDefender1_Click" Tag="2"/>
                     </StackPanel>
+                </StackPanel>
+            </Border>
+            
+            <Border x:Name="DadosResultadoOverlay"
+                Background="#AA222222"
+                Visibility="Collapsed"
+                IsHitTestVisible="False"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Panel.ZIndex="300">
+                <!-- Usar Orientation="Horizontal" para apilar ambos paneles en horizontal -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Height="Auto">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="Atacante"
+                 Foreground="OrangeRed"
+                 FontWeight="Bold"
+                 FontSize="20"
+                 TextAlignment="Center"
+                 Margin="0,0,0,6"/>
+                        <!-- Panel de dados en horizontal -->
+                        <StackPanel Orientation="Horizontal"
+                  x:Name="panelDadosAtacante"
+                  HorizontalAlignment="Center"
+                  Margin="0,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Espacio grande entre ambos paneles de dados -->
+                    <Rectangle Width="70" Fill="Transparent" />
+
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="Defensor"
+                 Foreground="DodgerBlue"
+                 FontWeight="Bold"
+                 FontSize="20"
+                 TextAlignment="Center"
+                 Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal"
+                  x:Name="panelDadosDefensor"
+                  HorizontalAlignment="Center"
+                  Margin="0,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="MoverTropasOverlay"
+                Background="#CC222222"
+                Visibility="Collapsed"
+                IsHitTestVisible="True"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Panel.ZIndex="400">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="#FFFCE8B4">
+                    <TextBlock Text="temp"
+                       x:Name="txbMover"
+                       FontWeight="Bold"
+                       FontSize="28"
+                       Foreground="#B22222"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,22"/>
+                    <TextBlock x:Name="txtMoverTropasMsg"
+                       Text="¿Cuántas tropas mover de {0} a {1}?"
+                       FontSize="18"
+                       TextAlignment="Center"
+                       Margin="0,0,0,12"/>
+                    <Slider x:Name="sliderMoverTropas"
+                    Minimum="1"
+                    Maximum="3"
+                    Value="1"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    Width="140"
+                    Height="40"
+                    Margin="0,0,0,12"/>
+                    <TextBlock x:Name="txtMoverTropasValor"
+                       Text="1"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="DarkBlue"
+                       TextAlignment="Center"
+                       Margin="0,0,0,10"/>
+                    <Button x:Name="btnMoverTropasOK"
+                    Content="Mover"
+                    Width="100"
+                    Height="36"
+                    FontWeight="Bold"
+                    Margin="0,0,0,0"
+                    Click="btnMoverTropasOK_Click"/>
                 </StackPanel>
             </Border>
         </Grid>

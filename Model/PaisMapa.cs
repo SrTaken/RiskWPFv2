@@ -16,6 +16,7 @@ namespace Model
         public int CentroX;
         public int CentroY;
         public int Tropas;
+        public List<PaisMapa> fronteras = new();
 
         public PaisMapa(string nombre)
         {
