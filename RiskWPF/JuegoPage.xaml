@@ -25,29 +25,8 @@
         <Canvas x:Name="OverlayCanvasHover" IsHitTestVisible="False"/>
         <Canvas x:Name="CanvasSelecciones" IsHitTestVisible="False"/>
 
-        <!-- Dados principales ocultos -->
-        <!--<Grid VerticalAlignment="Center" Visibility="Collapsed">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            --><!--<controls:D6Control Width="150" Height="150" MyNumber="5" x:Name="DadoIzquierdo1" Grid.Row="1"/>
-            <controls:D6Control Width="150" Height="150" MyNumber="2" x:Name="DadoIzquierdo2" Grid.Row="2"/>
-            <controls:D6Control Width="150" Height="150" MyNumber="3" x:Name="DadoIzquierdo3" Grid.Row="3"/>
-            <controls:D6Control Width="150" Height="150" MyNumber="4" x:Name="DadoDerecho1" Grid.Row="1" Grid.Column="1"/>
-            <controls:D6Control Width="150" Height="150" MyNumber="6" x:Name="DadoDerecho2" Grid.Row="2" Grid.Column="1"/>--><!--
-        </Grid>-->
-
-        <!-- UI principal -->
+        <Button Width="100" Height="50" x:Name="btnDemo" Click="btnDemo_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Content="DEMO"/>
         <Grid>
-            <!-- LISTA DE JUGADORES -->
             <ListView
                 x:Name="lvJugadores"
                 Width="250"
@@ -64,7 +43,7 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <!-- CONTROLES INFERIORES -->
+            <!-- CONTROLES de Abajo-->
             <StackPanel
                 Orientation="Horizontal"
                 HorizontalAlignment="Center"
@@ -72,7 +51,6 @@
                 Margin="0,0,0,22"
                 Panel.ZIndex="10">
 
-                <!-- Slider de tropas de refuerzo -->
                 <StackPanel Orientation="Vertical"
                     VerticalAlignment="Center"
                     Margin="0,0,8,0"
@@ -94,7 +72,6 @@
                      Width="70"/>
                 </StackPanel>
 
-                <!-- Panel de ataque (dados + botón atacar) -->
                 <StackPanel x:Name="panelAtaque"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
@@ -114,7 +91,6 @@
                   Click="btnAtacar_Click"/>
                 </StackPanel>
 
-                <!-- Botón de pasar turno -->
                 <Button Content="→"
                 x:Name="btnFlecha"
                 Width="60"
@@ -126,7 +102,6 @@
                 BorderBrush="#246"
                 Click="btnFlecha_Click"/>
 
-                <!-- Fases del juego -->
                 <Border x:Name="BordeFaseRefuerzo"
                 Margin="10"
                 Padding="13,9"
@@ -168,7 +143,6 @@
                 </Border>
             </StackPanel>
 
-            <!-- Pantalla de espera -->
             <Border x:Name="TurnWaitOverlay"
                 Background="#AA000000"
                 Visibility="Collapsed"
@@ -182,7 +156,6 @@
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"/>
             </Border>
-            <!-- Overlay de defensa -->
             <Border x:Name="DefensaOverlay"
               Background="#CC222222"
               Visibility="Collapsed"
@@ -210,57 +183,15 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            
-            <Border x:Name="DadosResultadoOverlay"
-                Background="#AA222222"
-                Visibility="Collapsed"
-                IsHitTestVisible="False"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Panel.ZIndex="300">
-                <!-- Usar Orientation="Horizontal" para apilar ambos paneles en horizontal -->
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Height="Auto">
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Atacante"
-                 Foreground="OrangeRed"
-                 FontWeight="Bold"
-                 FontSize="20"
-                 TextAlignment="Center"
-                 Margin="0,0,0,6"/>
-                        <!-- Panel de dados en horizontal -->
-                        <StackPanel Orientation="Horizontal"
-                  x:Name="panelDadosAtacante"
-                  HorizontalAlignment="Center"
-                  Margin="0,0,0,0"/>
-                    </StackPanel>
-
-                    <!-- Espacio grande entre ambos paneles de dados -->
-                    <Rectangle Width="70" Fill="Transparent" />
-
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Defensor"
-                 Foreground="DodgerBlue"
-                 FontWeight="Bold"
-                 FontSize="20"
-                 TextAlignment="Center"
-                 Margin="0,0,0,6"/>
-                        <StackPanel Orientation="Horizontal"
-                  x:Name="panelDadosDefensor"
-                  HorizontalAlignment="Center"
-                  Margin="0,0,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
 
             <Border x:Name="MoverTropasOverlay"
-                Background="#CC222222"
                 Visibility="Collapsed"
                 IsHitTestVisible="True"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Panel.ZIndex="400">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="#FFFCE8B4">
-                    <TextBlock Text="temp"
+                    <TextBlock 
                        x:Name="txbMover"
                        FontWeight="Bold"
                        FontSize="28"
@@ -295,6 +226,74 @@
                     FontWeight="Bold"
                     Margin="0,0,0,0"
                     Click="btnMoverTropasOK_Click"/>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="VictoriaDerrotaOverlay"
+        Background="#CC111188"
+        Visibility="Collapsed"
+        IsHitTestVisible="True"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Panel.ZIndex="999">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White" >
+                    <TextBlock x:Name="txtVictoriaDerrota"
+               Text="¡Has ganado la partida!"
+               FontWeight="Bold"
+               FontSize="38"
+               Foreground="Green"
+               TextAlignment="Center"
+               Margin="0,0,0,24"/>
+                    <TextBlock x:Name="txtGanadorNombre"
+               Text="Ganador: ---"
+               FontWeight="Bold"
+               FontSize="23"
+               Foreground="DarkSlateBlue"
+               TextAlignment="Center"
+               Margin="0,0,0,8"/>
+                    <Button Content="Volver al menú principal"
+            x:Name="btnVolverMenu"
+            FontWeight="Bold"
+            FontSize="20"
+            Padding="12,6"
+            Margin="0,18,0,0"
+            Click="btnVolverMenu_Click"/>
+                </StackPanel>
+            </Border>
+            <Border x:Name="DadosResultadoOverlay"
+    Visibility="Collapsed"
+    IsHitTestVisible="False"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch"
+    Panel.ZIndex="1000">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Height="250" Background="#FFFCE8B4">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="Atacante"
+     Foreground="OrangeRed"
+     FontWeight="Bold"
+     FontSize="20"
+     TextAlignment="Center"
+     Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal"
+      x:Name="panelDadosAtacante"
+      HorizontalAlignment="Center"
+      Margin="0,0,0,0"/>
+                    </StackPanel>
+
+                    <Rectangle Width="100" Fill="Transparent" />
+
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="Defensor"
+                            Foreground="DodgerBlue"
+                            FontWeight="Bold"
+                            FontSize="20"
+                            TextAlignment="Center"
+                            Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal"
+                          x:Name="panelDadosDefensor"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </Grid>

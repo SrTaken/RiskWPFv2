@@ -25,7 +25,7 @@ namespace RiskWPF
     /// </summary>
     public partial class PreJuegoPage : Page
     {
-        private List<string> colores = new() { "VERMELL", "BLAU", "VERD", "GROC" };
+        private List<string> colores = new() { "VERMELL", "BLAU", "VERD", "GROC", "VIOLETA", "TARONJA" };
 
         public PreJuegoPage()
         {

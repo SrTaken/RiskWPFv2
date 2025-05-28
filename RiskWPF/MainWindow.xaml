@@ -9,7 +9,6 @@
         WindowStyle="None" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Grid>
-        <!-- Marco de madera rústica como borde -->
         <Border Background="#8B4513" 
                 BorderBrush="#8B4513" 
                 BorderThickness="10" 
@@ -49,7 +48,7 @@
                                Foreground="#2C1A0E" 
                                Margin="0,0,0,10"/>
                     <TextBox x:Name="UsernameTextBox" 
-                             Height="40"       
+                             Height="45"       
                            Text="test1"
                              Background="#FFF8DC" 
                              BorderBrush="#8B4513" 
@@ -68,7 +67,7 @@
                                Foreground="#2C1A0E" 
                                Margin="0,20,0,10"/>
                     <PasswordBox x:Name="PasswordBox" 
-                                 Height="40" 
+                                 Height="45" 
                                  Password="1234"
                                  Background="#FFF8DC" 
                                  BorderBrush="#8B4513" 
@@ -82,7 +81,6 @@
                     </PasswordBox>
                 </StackPanel>
 
-                <!-- Botones con estilo rústico -->
                 <StackPanel Grid.Row="2" 
                             HorizontalAlignment="Center" 
                             Orientation="Horizontal" 

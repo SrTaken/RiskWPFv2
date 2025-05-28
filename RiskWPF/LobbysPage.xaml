@@ -22,7 +22,6 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Título -->
                 <TextBlock Grid.Row="0"
                                Text="Lobby de partidas"
                                FontFamily="Old English Text MT"
@@ -32,7 +31,6 @@
                                Margin="0,0,0,15"
                                HorizontalAlignment="Center"/>
 
-                <!-- Subtítulo (Opcional: puedes mostrar aquí el total de partidas/lobbys, etc.) -->
                 <TextBlock Grid.Row="1"
                                Text="Elige un lobby para unirte"
                                FontFamily="Old English Text MT"
@@ -42,7 +40,6 @@
                                Margin="0,0,0,15"
                                HorizontalAlignment="Center"/>
 
-                <!-- ListView de lobbys -->
                 <ListView x:Name="lvLobbys"
                               Grid.Row="2"
                               Margin="0,0,0,10"

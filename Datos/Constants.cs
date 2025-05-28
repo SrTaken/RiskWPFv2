@@ -18,6 +18,12 @@ namespace Datos
             public const string EmpezarPartida = "empezarBC";
             public const string SalirSala = "leaveSalaRS";
             public const string CrearSala = "createSalaRS";
+            public const string ResultadoAtaque = "resultadoAtaqueRS";
+            public const string Error = "errorRS";
+            public const string Ganador = "ganadorRS";
+            public const string Perdido = "hasPerdidoRS";
+            public const string TeAtacan = "teAtacanRS";
+            public const string HasConquistado = "hasConquistadoRS";
         }
 
         public class RQ
@@ -28,6 +34,15 @@ namespace Datos
             public const string JoinSala = "joinSalaRQ";
             public const string ActualizarSala = "updateSalaRQ";
             public const string SalirSala = "leaveSalaRQ";
+            public const string MoverTropas = "moverTropasRQ";
+            public const string Conquista = "conquistaRQ";
+            public const string Defensa = "meAtacanRQ";
+            public const string Ataque = "atacarRQ";
+            public const string SaltarTurno = "saltarTurnoRQ";
+            public const string ReforzarPais = "reforzarPaisRQ";
+            public const string ReforzarTurno = "reforzarTurnoRQ";
+            public const string SeleccionarPais = "seleccionarPaisRQ";
+            public const string ModoDemo = "tunearJueguitoRQ";
         }
     }
 }

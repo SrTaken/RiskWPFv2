@@ -33,6 +33,10 @@ namespace Datos
                     return Colors.Green;
                 case "GROC":
                     return Colors.Yellow;
+                case "VIOLETA":
+                    return Colors.Purple;
+                case "TARONJA":
+                    return Colors.Orange;
                 default:
                     return Colors.Transparent;
 

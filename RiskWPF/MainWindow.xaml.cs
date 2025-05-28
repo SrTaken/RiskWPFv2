@@ -118,7 +118,14 @@ namespace RiskWPF
             }
             else
             {
-                await Conection.SendMessage(Utils.user, Constants.RQ.Login);
+                try
+                {
+                    await Conection.SendMessage(Utils.user, Constants.RQ.Login);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error connecting to the server: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 //result = await Conection.ReceiveMessage();
             }
 

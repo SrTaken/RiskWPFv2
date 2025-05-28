@@ -80,6 +80,17 @@ namespace Datos
             ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
             await Client.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
         }
+        public static async Task SendMessage(string consulta)
+        {
+            string json;
+
+            json = "{\"request\":\"" + consulta + "\"," + "\"token\":\"" + Utils.user.Token + "\"}";
+
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            await Client.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
         public static async Task SendMessageUpdateSala(object message, string consulta)
         {
             string json = JsonConvert.SerializeObject(message);
@@ -164,7 +175,7 @@ namespace Datos
         public async static Task SendSeleccion(string token, string nombre)
         {
             string json;
-            string request = "seleccionarPaisRQ";
+            string request = Constants.RQ.SeleccionarPais;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + Utils.user.Token + "\",\"pais\":\"" + nombre + "\"}";
 
@@ -176,7 +187,7 @@ namespace Datos
         public static async Task EnviarRefuerzo(string token, string nombre, int tropasParaPoner, Estat fase)
         {
             string json;
-            string request = fase == Estat.REFORC_PAIS?"reforzarPaisRQ":"reforzarTurnoRQ";
+            string request = fase == Estat.REFORC_PAIS ? Constants.RQ.ReforzarPais : Constants.RQ.ReforzarTurno;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\",\"nom\":\"" + nombre+ "\",\"tropas\":\"" + tropasParaPoner + "\"}";
 
@@ -188,7 +199,7 @@ namespace Datos
         public static async Task FinalizaTurno(string token)
         {
             string json;
-            string request = "saltarTurnoRQ";
+            string request = Constants.RQ.SaltarTurno;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token  + "\"}";
 
@@ -200,7 +211,7 @@ namespace Datos
         public static async Task AtacarMensaje(string token, string nombre1, string nombre2, int numDadosAtacar)
         {
             string json;
-            string request = "atacarRQ";
+            string request = Constants.RQ.Ataque;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisAtacante\":\"" + nombre1 + "\"," + "\"paisDefensor\":\"" + nombre2 + "\"," + "\"numTropas\":" + numDadosAtacar + "}";
 
@@ -212,7 +223,7 @@ namespace Datos
         public static async Task DefenderMensaje(string token, string paisDefensaActual, int dados, string paisAtacante, int numDadosAtaque)
         {
             string json;
-            string request = "meAtacanRQ";
+            string request = Constants.RQ.Defensa;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisAtacante\":\"" + paisAtacante + "\"," + "\"paisDefensor\":\"" + paisDefensaActual + "\"," + "\"numTropasDefensa\":" + dados + "," + "\"numTropasAtaque\":" + numDadosAtaque+ "}";
 
@@ -224,7 +235,7 @@ namespace Datos
         public static async Task MoverTropasConquista(string token, string ultimoPaisAtacante, string ultimoPaisConquistado, int numDadosAtacar)
         {
             string json;
-            string request = "conquistaRQ";
+            string request = Constants.RQ.Conquista;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisOrigen\":\"" + ultimoPaisAtacante + "\"," + "\"paisDestino\":\"" + ultimoPaisConquistado + "\"," + "\"numTropas\":" + numDadosAtacar + "}";
 
@@ -236,7 +247,7 @@ namespace Datos
         public static async Task MoverTropasReagrupe(string token, string ultimoPaisAtacante, string ultimoPaisConquistado, int tropasAMover)
         {
             string json;
-            string request = "moverTropasRQ";
+            string request = Constants.RQ.MoverTropas;
 
             json = "{\"request\":\"" + request + "\"," + "\"token\":\"" + token + "\"," + "\"paisOrigen\":\"" + ultimoPaisAtacante + "\"," + "\"paisDestino\":\"" + ultimoPaisConquistado + "\"," + "\"numTropas\":" + tropasAMover + "}";
 

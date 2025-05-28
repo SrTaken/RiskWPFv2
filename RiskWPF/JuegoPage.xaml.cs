@@ -5,6 +5,7 @@ using RiskWPF.controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,7 +45,8 @@ namespace RiskWPF
         private int maxTropasMover = 1;
         private PaisMapa origenReagrupe = null;
         private PaisMapa destinoReagrupe = null;
-
+        private string conquestOrigenPendiente = null;
+        private string conquestDestinoPendiente = null;
         private int Seconds4Dice = 4; 
 
         private Dictionary<Color, PaisMapa> colorAPais = new Dictionary<Color, PaisMapa>
@@ -114,9 +116,6 @@ namespace RiskWPF
                 BordeFaseAtacar.Background = (Brush)FindResource("FaseAtacar_BG");
                 BordeFaseReagrupar.Background = (Brush)FindResource("FaseAtacar_BG");
             }
-            //lvJugadores.ItemsSource = Utils.partida.jugadorList;
-            //ActualizarTurno();
-            //ActualizarEstado();
             CargarPaises();
             ActualizarTurno();
             ActualizarEstado();
@@ -136,7 +135,6 @@ namespace RiskWPF
 
         private void ProcesaMensajeDelServidor(string json)
         {
-            //return;   
             if (json == null)
             {
                 MessageBox.Show("Unexpected Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -146,22 +144,29 @@ namespace RiskWPF
             var obj = JObject.Parse(json);
             var action = obj["response"]?.ToString();
 
-            if (action == "resultadoAtaqueRS")
+            if (action == Constants.RS.ResultadoAtaque)
             {
                 var dadosAtaque = obj["dadosAtaque"]?.ToObject<List<int>>() ?? new List<int>();
                 var dadosDefensa = obj["dadosDefensa"]?.ToObject<List<int>>() ?? new List<int>();
 
                 MostrarDadosResultado(dadosAtaque, dadosDefensa);
             }
-            else if (action == "ErrorRS")
+            else if (action == Constants.RS.Error)
             {
-                MessageBox.Show(obj["error"]?.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(obj["mesage"]?.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            else if (action == "fronterasRS")
+            else if (action == Constants.RS.Ganador)
             {
+                string nombreGanador = obj["nombre"]?.ToString();
+                int idGanador = obj["id"]?.ToObject<int>() ?? 0;
 
+                MostrarVictoriaDerrota(nombreGanador, idGanador);
             }
-            else if(action == "teAtacanRS")
+            else if (action == Constants.RS.Perdido)
+            {
+                Perdidio();
+            }
+            else if(action == Constants.RS.TeAtacan)
             {
                 paisAtacante = obj["paisAtacante"]?.ToString();
                 paisDefensor = obj["paisDefensor"]?.ToString();
@@ -175,11 +180,20 @@ namespace RiskWPF
 
                 MostrarDefensa(paisDefensor, tropasDefensor, numDadosAtaque, paisAtacante);
             }
-            else if (action == "hasConquistadoRS")
+            else if (action == Constants.RS.HasConquistado)
             {
                 string paisAtacante = obj["atacante"]?.ToString();
                 string paisConquistado = obj["conquistado"]?.ToString();
-                MostrarMoverTropas(paisAtacante, paisConquistado);
+
+                if (DadosResultadoOverlay.Visibility == Visibility.Visible)
+                {
+                    conquestOrigenPendiente = paisAtacante;
+                    conquestDestinoPendiente = paisConquistado;
+                }
+                else
+                {
+                    MostrarMoverTropas(paisAtacante, paisConquistado);
+                }
             }
             else
             {
@@ -196,15 +210,30 @@ namespace RiskWPF
         {
             DadosResultadoOverlay.Visibility = Visibility.Collapsed;
             dadosResultadoTimer.Stop();
+
+            if (conquestOrigenPendiente != null && conquestDestinoPendiente != null)
+            {
+                MostrarMoverTropas(conquestOrigenPendiente, conquestDestinoPendiente);
+                conquestOrigenPendiente = null;
+                conquestDestinoPendiente = null;
+            }
         }
 
         #region ActualizarPartida
         private void CargarPartida(string json)
         {
-            JObject jo = JObject.Parse(json);
-            JToken userToken = jo["partida"];
-            Utils.partida = userToken.ToObject<Partida>();
-            lvJugadores.ItemsSource = Utils.partida.jugadores;
+            try
+            {
+                JObject jo = JObject.Parse(json);
+                JToken userToken = jo["partida"];
+                Utils.partida = userToken.ToObject<Partida>();
+                lvJugadores.ItemsSource = Utils.partida.jugadores;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error inesperado: " + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
         }
         private void CargarPaises()
         {
@@ -235,8 +264,16 @@ namespace RiskWPF
             OverlayCanvas.IsEnabled = esMiTurno;
             OverlayCanvasHover.IsEnabled = esMiTurno;
 
-            stackPNumTropas.Visibility = esMiTurno  ? Visibility.Visible : Visibility.Collapsed;
-            btnFlecha.Visibility = esMiTurno ? Visibility.Visible: Visibility.Collapsed;
+
+            stackPNumTropas.Visibility =
+                  (Utils.partida.fase == Estat.REFORC_PAIS || Utils.partida.fase == Estat.REFORC_TROPES) && esMiTurno 
+                  ? Visibility.Visible
+                  : Visibility.Collapsed;
+
+            btnFlecha.Visibility =
+                  (Utils.partida.fase != Estat.COL_LOCAR_INICIAL || Utils.partida.fase != Estat.REFORC_TROPES) && esMiTurno
+                  ? Visibility.Visible
+                  : Visibility.Collapsed;
 
             if (esMiTurno)
             {
@@ -244,9 +281,15 @@ namespace RiskWPF
                 if (sliderTropasPaDentro.Value > sliderTropasPaDentro.Maximum)
                     sliderTropasPaDentro.Value = sliderTropasPaDentro.Maximum;
             }
+            else
+            {
+
+            }
 
             paisSeleccionado = null;
             paisAtaque = null;
+            paisAtacante = null;
+            paisDefensor = null;
             PintarSelecciones();
         }
         #endregion
@@ -384,8 +427,6 @@ namespace RiskWPF
         }
         private void MapaVisible_MouseMove(object sender, MouseEventArgs e)
         {
-            //if (TurnWaitOverlay.Visibility == Visibility.Visible)
-            //    return;
             Point pos = e.GetPosition(MapaVisible);
 
             int x = (int)(pos.X * mapaColoresWB.PixelWidth / MapaVisible.ActualWidth);
@@ -505,12 +546,21 @@ namespace RiskWPF
         {
             CanvasSelecciones.Children.Clear();
 
-            if (paisSeleccionado != null)
-                PintarResaltePais(paisSeleccionado, Colors.LimeGreen, 255);
-            if (paisAtaque != null)
-                PintarResaltePais(paisAtaque, Colors.MediumVioletRed, 255);
-
-            ActualizarPanelAtaque();
+            if (Utils.partida.fase == Estat.RECOL_LOCACIO)
+            {
+                if (origenReagrupe != null)
+                    PintarResaltePais(origenReagrupe, Colors.DarkOrange, 200); 
+                if (destinoReagrupe != null)
+                    PintarResaltePais(destinoReagrupe, Colors.DeepSkyBlue, 200); 
+            }
+            else
+            {
+                if (paisSeleccionado != null)
+                    PintarResaltePais(paisSeleccionado, Colors.LimeGreen, 255);
+                if (paisAtaque != null)
+                    PintarResaltePais(paisAtaque, Colors.MediumVioletRed, 255);
+                ActualizarPanelAtaque();
+            }
         }
         private void ActualizarPanelAtaque()
         {
@@ -519,22 +569,18 @@ namespace RiskWPF
 
             if (mostrarAtaque)
             {
-                // Calcular el máximo de dados (nunca dejar el país vacío)
                 int tropasAtt = paisSeleccionado.Tropas;
                 int maxDados = Math.Min(3, tropasAtt - 1);
                 if (maxDados < 1)
                 {
-                    // Si no puedo atacar (solo 1 tropa), oculto el panel de ataque completamente
                     panelAtaque.Visibility = Visibility.Collapsed;
                     return;
                 }
 
-                // Habilitar sólo los botones válidos para ese número de dados
                 btnDado1.IsEnabled = maxDados >= 1;
                 btnDado2.IsEnabled = maxDados >= 2;
                 btnDado3.IsEnabled = maxDados >= 3;
 
-                // Por si el numDadosAtacar está fuera del rango posible, lo ajusto:
                 if (numDadosAtacar > maxDados)
                     numDadosAtacar = maxDados;
                 if (numDadosAtacar < 1)
@@ -613,10 +659,6 @@ namespace RiskWPF
             BordeFaseRefuerzo.Background = Utils.partida.fase == Estat.REFORC_TROPES ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseRefuerzo_BG");
             BordeFaseAtacar.Background = Utils.partida.fase == Estat.COMBAT ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseAtacar_BG");
             BordeFaseReagrupar.Background = Utils.partida.fase == Estat.RECOL_LOCACIO ? new SolidColorBrush(Colors.LightGoldenrodYellow) : (Brush)FindResource("FaseReagrupar_BG");
-
-            stackPNumTropas.Visibility = Utils.partida.fase == Estat.REFORC_PAIS || Utils.partida.fase == Estat.REFORC_TROPES?Visibility.Visible:Visibility.Collapsed;
-            btnFlecha.Visibility = Utils.partida.fase == Estat.COL_LOCAR_INICIAL ? Visibility.Collapsed : Visibility.Visible;
-
         }
         private void RepintarLienzo()
         {
@@ -684,7 +726,7 @@ namespace RiskWPF
                 if (pais.jugadorId == 0) continue;
 
                 Point centro = Utils.CalcularCentroidePaisMask(colorPais, mapaColoresWB);
-                if (centro.X < 0) continue; // saltar si no existe
+                if (centro.X < 0) continue; 
 
                 double x = centro.X * (MapaVisible.ActualWidth / mapaColoresWB.PixelWidth);
                 double y = centro.Y * (MapaVisible.ActualHeight / mapaColoresWB.PixelHeight);
@@ -712,20 +754,21 @@ namespace RiskWPF
         }
         public void MostrarDadosResultado(List<int> dadosAtacante, List<int> dadosDefensor)
         {
+            //OcultarMoverTropas();
             panelDadosAtacante.Children.Clear();
             panelDadosDefensor.Children.Clear();
 
             foreach (var num in dadosAtacante)
             {
                 panelDadosAtacante.Children.Add(
-                    new controls.D6Control { MyNumber = num, Width = 80, Height = 80, Margin = new Thickness(4, 0, 4, 0) }
+                    new controls.D6Control { MyNumber = num, Width = 150, Height = 150, Margin = new Thickness(4, 0, 4, 0) }
                 );
             }
 
             foreach (var num in dadosDefensor)
             {
                 panelDadosDefensor.Children.Add(
-                    new controls.D6Control { MyNumber = num, Width = 80, Height = 80, Margin = new Thickness(4, 0, 4, 0) }
+                    new controls.D6Control { MyNumber = num, Width = 150, Height = 150, Margin = new Thickness(4, 0, 4, 0) }
                 );
             }
 
@@ -741,17 +784,15 @@ namespace RiskWPF
             ultimoPaisConquistado = paisConquistado;
             ultimoPaisAtacante = paisAtacante;
 
-            // Busca tus propias tropas en el país atacante:
             var miJugador = Utils.partida.jugadores.FirstOrDefault(j => j.Id == Utils.jugadorID);
             int tropasAtacante = 1;
             if (miJugador != null && miJugador.PaisesControlados.ContainsKey(paisAtacante))
                 tropasAtacante = miJugador.PaisesControlados[paisAtacante];
 
-            // El máximo que puedo mover es todas menos 1:
-            maxTropasMover = Math.Max(1, tropasAtacante - 1); // Siempre al menos 1
+            maxTropasMover = Math.Max(1, tropasAtacante - 1); 
 
             sliderMoverTropas.Minimum = 1;
-            sliderMoverTropas.Maximum = maxTropasMover;
+            sliderMoverTropas.Maximum = maxTropasMover-1;
             sliderMoverTropas.Value = 1;
             txtMoverTropasMsg.Text = $"¿Cuántas tropas vas a mover de {paisAtacante} a {paisConquistado}?";
             txtMoverTropasValor.Text = "1";
@@ -771,7 +812,10 @@ namespace RiskWPF
             sliderMoverTropas.ValueChanged -= SliderMoverTropas_ValueChanged;
             ultimoPaisConquistado = "";
             ultimoPaisAtacante = "";
-        }   
+            conquestOrigenPendiente = null;
+            conquestDestinoPendiente = null;
+        }
+
         private async void btnMoverTropasOK_Click(object sender, RoutedEventArgs e)
         {
             int tropasAMover = (int)sliderMoverTropas.Value;
@@ -802,7 +846,7 @@ namespace RiskWPF
             {
                 txbMover.Text = "¡Reagrupando tus tropas!";
             }
-            else
+            else if(Utils.partida.fase == Estat.COMBAT)
             {
                 txbMover.Text = "¡Has conquistado un país!";
             }
@@ -820,6 +864,51 @@ namespace RiskWPF
 
             ultimoPaisAtacante = origen;
             ultimoPaisConquistado = destino;
+        }
+        public void MostrarVictoriaDerrota(string nombreGanador, int idGanador)
+        {
+            bool soyGanador = idGanador == Utils.user.Id || idGanador == Utils.jugadorID;
+
+            txtVictoriaDerrota.Text = soyGanador
+                ? "¡Enhorabuena, has ganado la partida!"
+                : "Has perdido la partida";
+
+            txtVictoriaDerrota.Foreground = soyGanador ? Brushes.Green : Brushes.DarkRed;
+
+            txtGanadorNombre.Text = !string.IsNullOrWhiteSpace(nombreGanador)
+                ? $"Ganador: {nombreGanador}"
+                : "Ganador: ---";
+
+            VictoriaDerrotaOverlay.Visibility = Visibility.Visible;
+            MoverTropasOverlay.Visibility = Visibility.Collapsed;
+        }
+        public void Perdidio()
+        {
+            txtVictoriaDerrota.Text = "Has perdido la partida";
+
+            txtVictoriaDerrota.Foreground = Brushes.DarkRed;
+
+            txtGanadorNombre.Text = "Vuelve al lobby!";
+
+            VictoriaDerrotaOverlay.Visibility = Visibility.Visible;
+        }
+        private void btnVolverMenu_Click(object sender, RoutedEventArgs e)
+        {
+            Utils.partida = null;
+            Utils.sala = null;
+
+            Conection.OnMessageReceived -= MensajeRecibidoWebSocket;
+
+            var menuWindow = new MenuWindow();
+
+            menuWindow.Show();
+
+            Window.GetWindow(this)?.Close();
+        }
+
+        private async void btnDemo_Click(object sender, RoutedEventArgs e)
+        {
+            await Conection.SendMessage(Constants.RQ.ModoDemo);
         }
     }
 }
